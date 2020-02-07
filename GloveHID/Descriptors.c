@@ -43,24 +43,34 @@
  *  the device will send, and what it may be sent back from the host. Refer to the HID specification for
  *  more details on HID report descriptors.
  */
-const USB_Descriptor_HIDReport_Datatype_t PROGMEM GenericReport[] =
+const USB_Descriptor_HIDReport_Datatype_t PROGMEM GloveReport[] =
 {
-	HID_RI_USAGE_PAGE(16, 0xFF00), /* Vendor Page 0 */
-	HID_RI_USAGE(8, 0x01), /* Vendor Usage 1 */
-	HID_RI_COLLECTION(8, 0x01), /* Vendor Usage 1 */
-	    HID_RI_USAGE(8, 0x02), /* Vendor Usage 2 */
-	    HID_RI_LOGICAL_MINIMUM(8, 0x00),
-	    HID_RI_LOGICAL_MAXIMUM(8, 0xFF),
-	    HID_RI_REPORT_SIZE(8, 0x08),
-	    HID_RI_REPORT_COUNT(8, GENERIC_REPORT_SIZE),
-	    HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
-	    HID_RI_USAGE(8, 0x03), /* Vendor Usage 3 */
-	    HID_RI_LOGICAL_MINIMUM(8, 0x00),
-	    HID_RI_LOGICAL_MAXIMUM(8, 0xFF),
-	    HID_RI_REPORT_SIZE(8, 0x08),
-	    HID_RI_REPORT_COUNT(8, GENERIC_REPORT_SIZE),
-	    HID_RI_OUTPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
-	HID_RI_END_COLLECTION(0),
+	HID_RI_USAGE_PAGE(8, 0x01), /* VR Controls */
+	HID_RI_USAGE(8, 0x04), /* Joystick */
+	HID_RI_COLLECTION(8, 0x01), /* Application */
+		HID_RI_USAGE(8, 0x01), /* Pointer */
+		HID_RI_COLLECTION(8, 0x00), /* Physical */
+			HID_RI_USAGE(8, 0x30), /* Usage X */
+			HID_RI_USAGE(8, 0x31), /* Usage Y */
+			HID_RI_LOGICAL_MAXIMUM(8, 100),
+			HID_RI_PHYSICAL_MINIMUM(8, -1),
+			HID_RI_PHYSICAL_MAXIMUM(8, 1),
+			HID_RI_REPORT_COUNT(8, 0x03),
+			HID_RI_REPORT_SIZE(8, 0x08),
+			HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
+		HID_RI_END_COLLECTION(0),
+//		HID_RI_USAGE_PAGE(8, 0x09), /* Button */
+//		HID_RI_USAGE_MINIMUM(8, 0x01),
+//		HID_RI_USAGE_MAXIMUM(8, 0x02),
+//		HID_RI_LOGICAL_MINIMUM(8, 0x00),
+//		HID_RI_LOGICAL_MAXIMUM(8, 0x01),
+//		HID_RI_REPORT_SIZE(8, 0x01),
+//		HID_RI_REPORT_COUNT(8, 0x02),
+//		HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
+//		HID_RI_REPORT_SIZE(8, 0x06),
+//		HID_RI_REPORT_COUNT(8, 0x01),
+//		HID_RI_INPUT(8, HID_IOF_CONSTANT),
+	HID_RI_END_COLLECTION(0)
 };
 
 /** Device descriptor structure. This descriptor, located in FLASH memory, describes the overall
@@ -80,7 +90,7 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 	.Endpoint0Size          = FIXED_CONTROL_ENDPOINT_SIZE,
 
 	.VendorID               = 0x03EB,
-	.ProductID              = 0x204F,
+	.ProductID              = 0x1129,
 	.ReleaseNumber          = VERSION_BCD(0,0,1),
 
 	.ManufacturerStrIndex   = STRING_ID_Manufacturer,
@@ -116,10 +126,10 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
 
-			.InterfaceNumber        = INTERFACE_ID_GenericHID,
+			.InterfaceNumber        = INTERFACE_ID_GloveHID,
 			.AlternateSetting       = 0x00,
 
-			.TotalEndpoints         = 2,
+			.TotalEndpoints         = 1,
 
 			.Class                  = HID_CSCP_HIDClass,
 			.SubClass               = HID_CSCP_NonBootSubclass,
@@ -128,7 +138,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.InterfaceStrIndex      = NO_DESCRIPTOR
 		},
 
-	.HID_GenericHID =
+	.HID_GloveHID =
 		{
 			.Header                 = {.Size = sizeof(USB_HID_Descriptor_HID_t), .Type = HID_DTYPE_HID},
 
@@ -136,28 +146,18 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.CountryCode            = 0x00,
 			.TotalReportDescriptors = 1,
 			.HIDReportType          = HID_DTYPE_Report,
-			.HIDReportLength        = sizeof(GenericReport)
+			.HIDReportLength        = sizeof(GloveReport)
 		},
 
 	.HID_ReportINEndpoint =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
 
-			.EndpointAddress        = GENERIC_IN_EPADDR,
+			.EndpointAddress        = GLOVE_EPADDR,
 			.Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
-			.EndpointSize           = GENERIC_EPSIZE,
+			.EndpointSize           = GLOVE_EPSIZE,
 			.PollingIntervalMS      = 0x05
 		},
-
-	.HID_ReportOUTEndpoint =
-		{
-			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
-
-			.EndpointAddress        = GENERIC_OUT_EPADDR,
-			.Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
-			.EndpointSize           = GENERIC_EPSIZE,
-			.PollingIntervalMS      = 0x05
-		}
 };
 
 /** Language descriptor structure. This descriptor, located in FLASH memory, is returned when the host requests
@@ -223,12 +223,12 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 
 			break;
 		case HID_DTYPE_HID:
-			Address = &ConfigurationDescriptor.HID_GenericHID;
+			Address = &ConfigurationDescriptor.HID_GloveHID;
 			Size    = sizeof(USB_HID_Descriptor_HID_t);
 			break;
 		case HID_DTYPE_Report:
-			Address = &GenericReport;
-			Size    = sizeof(GenericReport);
+			Address = &GloveReport;
+			Size    = sizeof(GloveReport);
 			break;
 	}
 

@@ -41,7 +41,7 @@
 
 		#include <avr/pgmspace.h>
 
-		#include "Config/AppConfig.h"
+//		#include "Config/AppConfig.h"
 
 	/* Type Defines: */
 		/** Type define for the device configuration descriptor structure. This must be defined in the
@@ -54,7 +54,7 @@
 
 			// Generic HID Interface
 			USB_Descriptor_Interface_t            HID_Interface;
-			USB_HID_Descriptor_HID_t              HID_GenericHID;
+			USB_HID_Descriptor_HID_t              HID_GloveHID;
 			USB_Descriptor_Endpoint_t             HID_ReportINEndpoint;
 			USB_Descriptor_Endpoint_t             HID_ReportOUTEndpoint;
 		} USB_Descriptor_Configuration_t;
@@ -65,7 +65,7 @@
 		 */
 		enum InterfaceDescriptors_t
 		{
-			INTERFACE_ID_GenericHID = 0, /**< GenericHID interface descriptor ID */
+			INTERFACE_ID_GloveHID = 0, /**< GenericHID interface descriptor ID */
 		};
 
 		/** Enum for the device string descriptor IDs within the device. Each string descriptor should
@@ -81,13 +81,13 @@
 
 	/* Macros: */
 		/** Endpoint address of the Generic HID reporting IN endpoint. */
-		#define GENERIC_IN_EPADDR         (ENDPOINT_DIR_IN  | 1)
-
-		/** Endpoint address of the Generic HID reporting OUT endpoint. */
-		#define GENERIC_OUT_EPADDR        (ENDPOINT_DIR_OUT | 2)
+		#define GLOVE_EPADDR         	(ENDPOINT_DIR_IN  | 1)
 
 		/** Size in bytes of the Generic HID reporting endpoint. */
-		#define GENERIC_EPSIZE            8
+		#define GLOVE_EPSIZE				8
+
+		#define DTYPE_HID					0x21
+		#define DTYPE_Report				0x22
 
 	/* Function Prototypes: */
 		uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,

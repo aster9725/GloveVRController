@@ -45,24 +45,35 @@
 		#include <string.h>
 
 		#include "Descriptors.h"
-		#include "Config/AppConfig.h"
+//		#include "Config/AppConfig.h"
 
 		#include <LUFA/Drivers/USB/USB.h>
-		#include <LUFA/Drivers/Board/LEDs.h>
+//		#include <LUFA/Drivers/Board/LEDs.h>
 		#include <LUFA/Platform/Platform.h>
 
 	/* Macros: */
 		/** LED mask for the library LED driver, to indicate that the USB interface is not ready. */
-		#define LEDMASK_USB_NOTREADY      LEDS_LED1
+//		#define LEDMASK_USB_NOTREADY      LEDS_LED1
 
 		/** LED mask for the library LED driver, to indicate that the USB interface is enumerating. */
-		#define LEDMASK_USB_ENUMERATING  (LEDS_LED2 | LEDS_LED3)
+//		#define LEDMASK_USB_ENUMERATING  (LEDS_LED2 | LEDS_LED3)
 
 		/** LED mask for the library LED driver, to indicate that the USB interface is ready. */
-		#define LEDMASK_USB_READY        (LEDS_LED2 | LEDS_LED4)
+//		#define LEDMASK_USB_READY        (LEDS_LED2 | LEDS_LED4)
 
 		/** LED mask for the library LED driver, to indicate that an error has occurred in the USB interface. */
-		#define LEDMASK_USB_ERROR        (LEDS_LED1 | LEDS_LED3)
+//		#define LEDMASK_USB_ERROR        (LEDS_LED1 | LEDS_LED3)
+
+	/* Data Structure */
+	typedef struct
+	{
+		int16_t accX;
+		int16_t accY;
+		int16_t accZ;
+		int16_t gyoX;
+		int16_t gyoY;
+		int16_t gyoZ;
+	} USB_GloveReport_Data_t;
 
 	/* Function Prototypes: */
 		void SetupHardware(void);
@@ -72,10 +83,8 @@
 		void EVENT_USB_Device_Disconnect(void);
 		void EVENT_USB_Device_ConfigurationChanged(void);
 		void EVENT_USB_Device_ControlRequest(void);
-		void EVENT_USB_Device_StartOfFrame(void);
 
-		void ProcessGenericHIDReport(uint8_t* DataArray);
-		void CreateGenericHIDReport(uint8_t* DataArray);
+		bool GetNextReport(USB_GloveReport_Data_t* const ReportData);
 
 #endif
 
