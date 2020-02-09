@@ -1,0 +1,19 @@
+{
+    "thumbnail" : "",
+    "components": {
+        "/skeleton/hand/left": {
+            "filename": "vr_glove_left_model_slim.obj",
+            "component_local" : {
+                "origin": [0.0, 0.0, 0.0],
+                "rotate_xyz" : [0.0,0.0,0.0]
+            }
+        },
+        "/skeleton/hand/right": {
+            "filename": "vr_glove_right_model_slim.obj",
+            "component_local" : {
+                "origin": [0.0, 0.0, 0.0],
+                "rotate_xyz" : [0.0,0.0,0.0]
+            }
+        }
+    }
+}
