@@ -5,36 +5,21 @@
 #  dean [at] fourwalledcubicle [dot] com
 #           www.lufa-lib.org
 #
-# ---------------------------------------
-#  Makefile for the LUFA library itself.
-# ---------------------------------------
 
-LUFA_VERSION_NUM := $(shell grep LUFA_VERSION_STRING Version.h | cut -d'"' -f2)
+# Makefile to build the LUFA library, projects and demos.
 
-# Default target - no default action when attempting to build the core directly
+# Call with "make all" to rebuild everything, "make clean" to clean everything,
+# "make doxygen" to document everything with Doxygen (if installed). Call
+# "make help" for additional target build information within a specific project.
+
 all:
 
-# Display the LUFA version of this library copy
-version:
-	@echo "LUFA $(LUFA_VERSION_NUM)"
-
-LUFA_PATH               := .
-ARCH                    := {AVR8,UC3,XMEGA}
-DOXYGEN_OVERRIDE_PARAMS := QUIET=YES PROJECT_NUMBER=$(LUFA_VERSION_NUM)
-
-# Remove all object and associated files from the LUFA library core
-clean:
-	rm -f $(LUFA_SRC_ALL_FILES:%.c=%.o)
-	rm -f $(LUFA_SRC_ALL_FILES:%.c=%.d)
-	rm -f $(LUFA_SRC_ALL_FILES:%.c=%.lst)
-
-# Include LUFA-specific DMBS extension modules
-DMBS_LUFA_PATH ?= $(LUFA_PATH)/Build/LUFA
-include $(DMBS_LUFA_PATH)/lufa-sources.mk
-
-# Include common DMBS build system modules
-DMBS_PATH      ?= $(LUFA_PATH)/Build/DMBS/DMBS
-include $(DMBS_PATH)/core.mk
-include $(DMBS_PATH)/doxygen.mk
-
-.PHONY: all version
+%:
+	@echo Executing \"make $@\" on all LUFA library elements.
+	@echo
+	$(MAKE) -C LUFA $@
+	$(MAKE) -C Demos $@
+	$(MAKE) -C Projects $@
+	$(MAKE) -C Bootloaders $@
+	@echo
+	@echo LUFA \"make $@\" operation complete.
