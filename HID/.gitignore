@@ -6,3 +6,7 @@
 *.map
 *.sym
 obj/
+.vs/
+HID.atsln
+HID.componentinfo.xml
+HID.cproj

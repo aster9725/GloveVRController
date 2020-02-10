@@ -35,6 +35,7 @@
  */
 
 #include "GloveHID.h"
+#include "UART.h"
 
 
 /** Main program entry point. This routine configures the hardware required by the application, then
@@ -43,7 +44,8 @@
 int main(void)
 {
 	SetupHardware();
-
+	
+	UART_printString("GloveHID Setup Start\n\r");
 	GlobalInterruptEnable();
 
 	for (;;)
@@ -65,6 +67,11 @@ void SetupHardware(void)
 
 	/* Hardware Initialization */
 	USB_Init();
+
+	/* Serial Initialization */
+	UART_INIT(9600);
+
+
 }
 
 /** Event handler for the USB_Connect event. This indicates that the device is enumerating via the status LEDs and
@@ -120,21 +127,6 @@ void EVENT_USB_Device_ControlRequest(void)
 			}
 
 			break;
-/*		case HID_REQ_SetReport:
-			if (USB_ControlRequest.bmRequestType == (REQDIR_HOSTTODEVICE | REQTYPE_CLASS | REQREC_INTERFACE))
-			{
-				uint8_t GenericData[GENERIC_REPORT_SIZE];
-
-				Endpoint_ClearSETUP();
-
-				// Read the report data from the control endpoint
-				Endpoint_Read_Control_Stream_LE(&GenericData, sizeof(GenericData));
-				Endpoint_ClearIN();
-
-				ProcessGenericHIDReport(GenericData);
-			}
-
-			break;*/
 	}
 }
 
@@ -156,28 +148,6 @@ void HID_Task(void)
 	/* Device must be connected and configured for the task to run */
 	if (USB_DeviceState != DEVICE_STATE_Configured)
 	  return;
-
-//	Endpoint_SelectEndpoint(GENERIC_OUT_EPADDR);
-
-	/* Check to see if a packet has been sent from the host */
-//	if (Endpoint_IsOUTReceived())
-//	{
-		/* Check to see if the packet contains data */
-//		if (Endpoint_IsReadWriteAllowed())
-//		{
-			/* Create a temporary buffer to hold the read in report from the host */
-//			uint8_t GenericData[GENERIC_REPORT_SIZE];
-
-			/* Read Generic Report Data */
-//			Endpoint_Read_Stream_LE(&GenericData, sizeof(GenericData), NULL);
-
-			/* Process Generic Report Data */
-//			ProcessGenericHIDReport(GenericData);
-//		}
-
-		/* Finalize the stream transfer to send the last packet */
-		Endpoint_ClearOUT();
-//	}
 
 	Endpoint_SelectEndpoint(GLOVE_EPADDR);
 
