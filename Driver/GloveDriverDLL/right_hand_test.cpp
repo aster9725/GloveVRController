@@ -90,6 +90,7 @@ public:
             &m_skeleton);
         m_active = true;
         m_pose_thread = std::thread(&RightHandTest::UpdatePoseThread, this);
+        DriverLog("Dev] Glove Contorller Activated");
         return VRInitError_None;
     }
 
@@ -99,6 +100,7 @@ public:
         {
             m_active = false;
             m_pose_thread.join();
+            DriverLog("Dev] Glove Contorller Deactivated");
         }
     }
 

@@ -45,15 +45,23 @@
  */
 const USB_Descriptor_HIDReport_Datatype_t PROGMEM GloveReport[] =
 {
-	0x05, 0x03,                    // USAGE_PAGE (VR Controls)
-	0x09, 0x04,                    // USAGE (Glove)
-	0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
-	0x25, 0x64,                    //   LOGICAL_MAXIMUM (100)
-	0x36, 0x00, 0x80,              //   PHYSICAL_MINIMUM (-32768)
-	0x46, 0xff, 0x7f,              //   PHYSICAL_MAXIMUM (32767)
-	0x95, 0x03,                    //   REPORT_COUNT (3)
-	0x75, 0x10,                    //   REPORT_SIZE (16)
-	0x81, 0x02                     //   INPUT (Data,Var,Abs)
+    0x05, 0x03,                    // USAGE_PAGE (VR Controls)
+    0x09, 0x04,                    // USAGE (Glove)
+    0x16, 0x00, 0x80,              // LOGICAL_MINIMUM (-32768)
+    0x26, 0xff, 0x7f,              // LOGICAL_MAXIMUM (32767)
+    0x35, 0xfc,                    // PHYSICAL_MINIMUM (-4)
+    0x45, 0x04,                    // PHYSICAL_MAXIMUM (4)
+    0x95, 0x03,                    // REPORT_COUNT (3)
+    0x75, 0x10,                    // REPORT_SIZE (16)
+    0x81, 0x02,                    // INPUT (Data,Var,Abs)
+    0x09, 0x04,                    // USAGE (Glove)
+    0x16, 0x00, 0x80,              // LOGICAL_MINIMUM (-32768)
+    0x26, 0xff, 0x7f,              // LOGICAL_MAXIMUM (32767)
+    0x35, 0x00,                    // PHYSICAL_MINIMUM (0)
+    0x46, 0xd0, 0x07,              // PHYSICAL_MAXIMUM (2000)
+    0x95, 0x03,                    // REPORT_COUNT (3)
+    0x75, 0x10,                    // REPORT_SIZE (16)
+    0x81, 0x02                     // INPUT (Data,Var,Abs)
 };
 
 /** Device descriptor structure. This descriptor, located in FLASH memory, describes the overall

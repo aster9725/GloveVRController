@@ -161,6 +161,18 @@ void HID_Task(void)
 
 		/* Create Generic Report Data */
 		GetNextReport(&GloveReportData);
+		
+		UART_printString("ReportData: \n\r");
+		UART_printString("\tAcc [ X:Y:Z ] | [ ");
+		UART_printUINT(GloveReportData.accX);
+		UART_printUINT(GloveReportData.accY);
+		UART_printUINT(GloveReportData.accZ);
+		UART_printString(" ]\n\r");
+		UART_printString("\tGyro [ X:Y:Z ] | [ ");
+		UART_printUINT(GloveReportData.gyoX);
+		UART_printUINT(GloveReportData.gyoY);
+		UART_printUINT(GloveReportData.gyoZ);
+		UART_printString(" ]\n\r");
 
 		/* Write Generic Report Data */
 		Endpoint_Write_Stream_LE(&GloveReportData, sizeof(GloveReportData), NULL);
