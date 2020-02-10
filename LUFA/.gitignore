@@ -13,4 +13,12 @@ Documentation/
 node_modules/
 LUFA/StudioIntegration/ProjectGenerator/*
 LUFA/StudioIntegration/DocBook/*
+Demo/
+Project/
+Bootloaders/
+BuildTests/
+Maintenance/
+Projects/
+README.txt
+makefile
 !LUFA/StudioIntegration/Docbook/mshelp/*
