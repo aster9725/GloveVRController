@@ -1,11 +1,6 @@
 [
   {
     "language_tag": "en_US",
-    "glove" : "Glove Controller",
-    "/input/finger/thumb" : "Thumb Finger",
-    "/input/finger/index" : "Index Finger",
-    "/input/finger/middle" : "Middle Finger",
-    "/input/finger/ring" : "Ring Finger",
-    "/input/finger/pinky" : "Pinky Finger"
+    "glove" : "Glove Right Hand Test"
   }
 ]

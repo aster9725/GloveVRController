@@ -1,68 +1,49 @@
 {
-   "jsonid": "input_profile",
-   "controller_type" : "knuckles",
-   "device_class" : "TrackedDeviceClass_Controller",
-   "resource_root" : "glove",
-   "driver_name" : "glove",
-   "legacy_binding": "{glove}/input/legacy_bindings_glove.json",
-   "name" : "glove",
-   "input_bindingui_mode":"controller_handed",
-   "should_show_binding_errors" :  true,
-   "input_bindingui_left":
-   {
-      "transform" : "scale(-1,1)",
-      "image" : "{glove}/icons/HandLeftIcon.png"
-   },
-   "input_bindingui_right":
-   {
-      "image" : "{glove}/icons/HandRightIcon.png"
-   },
-   "input_source" :
-   {
-      "/input/finger/thumb" : {
-      "type" : "trigger",
-      "visibility" : "InputValueVisibility_AvailableButHidden",
-      "binding_image_point" : [ 56, 86 ],
-      "order" : 100
-    },
-      "/input/finger/index" : {
-      "type" : "trigger",
-      "visibility" : "InputValueVisibility_AvailableButHidden",
-      "binding_image_point" : [ 56, 86 ],
-      "order" : 101
+  "jsonid": "input_profile",
+  "controller_type": "glove",
+  "legacy_profile": "glove",
+  "legacy_binding" :  "{glove}/input/legacy_bindings_glove.json",
+  "input_bindingui_mode" : "controller_handed",
+  "input_bindingui_left" :
+  {
+    "image": "{glove}/icons/glove.svg"
+  },
+  "input_bindingui_right" :
+  {
+    "image": "{glove}/icons/glove.svg"
+  },
+  "input_source" :
+  {
+    "/input/finger/index" : {
+        "type" : "trigger",
+	"visibility" : "InputValueVisibility_AvailableButHidden",
+        "binding_image_point" : [ 56, 86 ]
     },
     "/input/finger/middle" : {
-      "type" : "trigger",
-      "visibility" : "InputValueVisibility_AvailableButHidden",
-      "binding_image_point" : [ 56, 86 ],
-      "order" : 102
+        "type" : "trigger",
+	"visibility" : "InputValueVisibility_AvailableButHidden",
+        "binding_image_point" : [ 56, 86 ]
     },
     "/input/finger/ring" : {
-      "type" : "trigger",
-      "visibility" : "InputValueVisibility_AvailableButHidden",
-      "binding_image_point" : [ 56, 86 ],
-      "order" : 103
+        "type" : "trigger",
+	"visibility" : "InputValueVisibility_AvailableButHidden",
+        "binding_image_point" : [ 56, 86 ]
     },
     "/input/finger/pinky" : {
-      "type" : "trigger",
-      "visibility" : "InputValueVisibility_AvailableButHidden",
-      "binding_image_point" : [ 56, 86 ],
-      "order" : 104
+        "type" : "trigger",
+	"visibility" : "InputValueVisibility_AvailableButHidden",
+        "binding_image_point" : [ 56, 86 ]
     },
     "/pose/raw" : {
-      "type" : "pose",
-      "binding_image_point" : [ 5, 35 ]
-    },
-    "/input/skeleton/left" : {
-      "type" : "skeleton",
-      "skeleton": "/skeleton/hand/left",
-      "side" : "left",
-      "binding_image_point" : [ 5, 35 ]
+        "type" : "pose",
+        "binding_image_point" : [ 5, 35 ]
     },
     "/input/skeleton/right" : {
-      "type" : "skeleton",
-      "skeleton": "/skeleton/hand/right",
-      "side" : "right",
-      "binding_image_point" : [ 5, 35 ]
-    },
-}
+        "type" : "skeleton",
+        "skeleton": "/skeleton/hand/right",
+        "side" : "right",
+        "binding_image_point" : [ 5, 35 ]
+    }
+  }
+ }
+

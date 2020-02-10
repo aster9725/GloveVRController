@@ -1,9 +1,7 @@
 {
-	"alwaysActivate": false,
+	"alwaysActivate": true,
 	"name" : "glove",
 	"directory" : "",
 	"resourceOnly" : false,
-	"other_presence": [
-		"2341.8036"
-	]
+	"hmd_presence" : []
 }

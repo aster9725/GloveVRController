@@ -1,6 +1,8 @@
 {
    "bindings" : {
       "/actions/legacy" : {
+         "haptics" : [
+         ],
          "poses" : [
             {
                "output" : "/actions/legacy/in/Left_Pose",
@@ -11,13 +13,13 @@
                "path" : "/user/hand/right/pose/raw"
             }
          ],
-        "sources": [
-         
-        ]
-      },
+         "sources" : [
+         ]
+      }
    },
-   "controller_type" : "glove",
-   "description" : "Default binding values for legacy app using glove controller",
-   "name" : "glove legacy defaults",
+   "controller_type" : "fist",
+   "description" : "Default binding values for legacy apps using the fist controller",
+   "name" : "fist Legacy Defaults",
    "simulated_actions" : []
 }
+
