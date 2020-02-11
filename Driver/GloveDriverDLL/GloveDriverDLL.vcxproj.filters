@@ -21,7 +21,7 @@
     <ClCompile Include="driverlog.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="right_hand_test.cpp">
+    <ClCompile Include="glove.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -30,6 +30,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="driverlog.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="hid.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

@@ -7,6 +7,6 @@
 *.sym
 obj/
 .vs/
-HID.atsln
-HID.componentinfo.xml
-HID.cproj
+GloveHID.atsln
+GloveHID.componentinfo.xml
+GloveHID.cproj

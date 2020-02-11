@@ -80,7 +80,7 @@ void SetupHardware(void)
 void EVENT_USB_Device_Connect(void)
 {
 	/* Indicate USB enumerating */
-	UART_printString("Connected\n");
+	UART_printString("Connected\n\r");
 }
 
 /** Event handler for the USB_Disconnect event. This indicates that the device is no longer connected to a host via
@@ -89,7 +89,7 @@ void EVENT_USB_Device_Connect(void)
 void EVENT_USB_Device_Disconnect(void)
 {
 	/* Indicate USB not ready */
-	UART_printString("Disconnected\n");
+	UART_printString("Disconnected\n\r");
 }
 
 /** Event handler for the USB_ConfigurationChanged event. This is fired when the host sets the current configuration

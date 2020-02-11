@@ -21,11 +21,12 @@
   <ItemGroup>
     <ClCompile Include="bones.cpp" />
     <ClCompile Include="driverlog.cpp" />
-    <ClCompile Include="right_hand_test.cpp" />
+    <ClCompile Include="glove.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bones.h" />
     <ClInclude Include="driverlog.h" />
+    <ClInclude Include="hid.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -60,7 +61,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>WindowsUserModeDriver10.0</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <SpectreMitigation>false</SpectreMitigation>
@@ -175,7 +176,7 @@
       <PreprocessorDefinitions>NDEBUG;GLOVEDRIVERDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -1,8 +1,1 @@
-﻿  right_hand_test.cpp
-     D:\Ubuntu\GloveVRController\Driver\GloveDriverDLL\..\glove\bin\win64\driver_glove.lib 라이브러리 및 D:\Ubuntu\GloveVRController\Driver\GloveDriverDLL\..\glove\bin\win64\driver_glove.exp 개체를 생성하고 있습니다.
-  코드를 생성하고 있습니다.
-  1 of 145 functions ( 0.7%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    2 functions had inline decision re-evaluated but remain unchanged
-  코드를 생성했습니다.
-  GloveDriverDLL.vcxproj -> D:\Ubuntu\GloveVRController\Driver\GloveDriverDLL\..\glove\bin\win64\driver_glove.dll
+﻿C:\Program Files (x86)\Windows Kits\10\build\WindowsDriver.common.targets(178,5): error : An SDK corresponding to WDK version '10.0.18362.0' was not found. Please install the SDK before building.
