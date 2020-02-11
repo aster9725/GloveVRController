@@ -60,7 +60,6 @@ ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
 	volatile static uint8_t read_byte_cnt = 0;
 	volatile static uint16_t* pData = (uint16_t*)&(gGloveReportData.accX);
 	data = UDR1;
-	UART_transmit(data);
 	if (data == START_CHAR)
 	{
 		flagReportData &= ~(FRD_DIRTY);
@@ -102,12 +101,12 @@ void SetupHardware(void)
 
 	/* Disable clock division */
 	clock_prescale_set(clock_div_1);
-	
-	/* Serial Initialization */
-	UART_INIT(9600);
 
 	/* Hardware Initialization */
 	USB_Init();
+	
+	/* Serial Initialization */
+	UART_INIT(9600);
 }
 
 /** Event handler for the USB_Connect event. This indicates that the device is enumerating via the status LEDs and
@@ -257,28 +256,28 @@ void HID_Task(void)
 		if(GetNextReport(&GloveReportData))
 		{
 		
-			UART_printString("[ReportData Write] \n\r");
-			UART_printString("\tAcc  [ X:Y:Z ] | [ ");
-			UART_printUINT(GloveReportData.accX);
-			UART_printString(" : ");
-			UART_printUINT(GloveReportData.accY);
-			UART_printString(" : ");
-			UART_printUINT(GloveReportData.accZ);
-			UART_printString(" ]\n\r");
-			UART_printString("\tGyro [ X:Y:Z ] | [ ");
-			UART_printUINT(GloveReportData.gyroX);
-			UART_printString(" : ");
-			UART_printUINT(GloveReportData.gyroY);
-			UART_printString(" : ");
-			UART_printUINT(GloveReportData.gyroZ);
-			UART_printString(" ]\n\r");
-			UART_printString("\tGeo  [ X:Y:Z ] | [ ");
-			UART_printUINT(GloveReportData.geoX);
-			UART_printString(" : ");
-			UART_printUINT(GloveReportData.geoY);
-			UART_printString(" : ");
-			UART_printUINT(GloveReportData.geoZ);
-			UART_printString(" ]\n\r");
+			//UART_printString("[ReportData Write] \n\r");
+			//UART_printString("\tAcc  [ X:Y:Z ] | [ ");
+			//UART_printUINT(GloveReportData.accX);
+			//UART_printString(" : ");
+			//UART_printUINT(GloveReportData.accY);
+			//UART_printString(" : ");
+			//UART_printUINT(GloveReportData.accZ);
+			//UART_printString(" ]\n\r");
+			//UART_printString("\tGyro [ X:Y:Z ] | [ ");
+			//UART_printUINT(GloveReportData.gyroX);
+			//UART_printString(" : ");
+			//UART_printUINT(GloveReportData.gyroY);
+			//UART_printString(" : ");
+			//UART_printUINT(GloveReportData.gyroZ);
+			//UART_printString(" ]\n\r");
+			//UART_printString("\tGeo  [ X:Y:Z ] | [ ");
+			//UART_printUINT(GloveReportData.geoX);
+			//UART_printString(" : ");
+			//UART_printUINT(GloveReportData.geoY);
+			//UART_printString(" : ");
+			//UART_printUINT(GloveReportData.geoZ);
+			//UART_printString(" ]\n\r");
 
 			/* Write Generic Report Data */
 			Endpoint_Write_Stream_LE(&GloveReportData, sizeof(USB_GloveReport_Data_t), NULL);
