@@ -45,22 +45,38 @@
  */
 const USB_Descriptor_HIDReport_Datatype_t PROGMEM GloveReport[] =
 {
-    0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
-    0x09, 0x04,                    // USAGE (Joystick)
-    0xa1, 0x01,                    // COLLECTION (Application)
-    0x85, 0x06,                    //   REPORT_ID (6)
-    0x05, 0x03,                    //   USAGE_PAGE (VR Controls)
-    0xa1, 0x00,                    //   COLLECTION (Physical)
-    0x09, 0x04,                    //     USAGE (Glove)
-    0x16, 0x00, 0x80,              //     LOGICAL_MINIMUM (-32768)
-    0x26, 0xff, 0x7f,              //     LOGICAL_MAXIMUM (32767)
-    0x35, 0xfc,                    //     PHYSICAL_MINIMUM (-4)
-    0x45, 0x04,                    //     PHYSICAL_MAXIMUM (4)
-    0x95, 0x03,                    //     REPORT_COUNT (3)
-    0x75, 0x10,                    //     REPORT_SIZE (16)
-    0x81, 0x02,                    //     INPUT (Data,Var,Abs)
-    0xc0,                          //     END_COLLECTION
-    0xc0                           // END_COLLECTION
+	HID_RI_USAGE_PAGE(8, 0x01), /* Generic Desktop */
+	HID_RI_USAGE(8, 0x04), /* Joystick */
+	HID_RI_COLLECTION(8, 0x01), /* Application */
+		HID_RI_USAGE(8, 0x01), /* Pointer */
+		HID_RI_COLLECTION(8, 0x02), /* Logical */
+			HID_RI_USAGE(8, 0x30), /* Usage X */
+			HID_RI_USAGE(8, 0x31), /* Usage Y */
+			HID_RI_USAGE(8, 0x32), /* Usage Z */
+			HID_RI_USAGE(8, 0x33), /* Usage Rx */
+			HID_RI_USAGE(8, 0x34), /* Usage Ry */
+			HID_RI_USAGE(8, 0x35), /* Usage Rz */
+			HID_RI_USAGE(8, 0x40), /* Usage Vx */
+			HID_RI_USAGE(8, 0x41), /* Usage Vy */
+			HID_RI_USAGE(8, 0x42), /* Usage Vz */
+			HID_RI_LOGICAL_MINIMUM(16, -32768),
+			HID_RI_LOGICAL_MAXIMUM(16, 32767),
+			HID_RI_REPORT_COUNT(8, 0x09),
+			HID_RI_REPORT_SIZE(8, 0x10),
+			HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
+		HID_RI_END_COLLECTION(0),
+		HID_RI_USAGE_PAGE(8, 0x09), /* Button */
+		HID_RI_USAGE_MINIMUM(8, 0x01),
+		HID_RI_USAGE_MAXIMUM(8, 0x02),
+		HID_RI_LOGICAL_MINIMUM(8, 0x00),
+		HID_RI_LOGICAL_MAXIMUM(8, 0x01),
+		HID_RI_REPORT_SIZE(8, 0x01),
+		HID_RI_REPORT_COUNT(8, 0x02),
+		HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
+		HID_RI_REPORT_SIZE(8, 0x06),
+		HID_RI_REPORT_COUNT(8, 0x01),
+		HID_RI_INPUT(8, HID_IOF_CONSTANT),
+	HID_RI_END_COLLECTION(0),
 };
 
 /** Device descriptor structure. This descriptor, located in FLASH memory, describes the overall
@@ -79,13 +95,13 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 
 	.Endpoint0Size          = FIXED_CONTROL_ENDPOINT_SIZE,
 
-	.VendorID               = 0x03EB,
+	.VendorID               = 0x1991,
 	.ProductID              = 0x1129,
-	.ReleaseNumber          = VERSION_BCD(0,0,1),
+	.ReleaseNumber          = VERSION_BCD(1,0,1),
 
 	.ManufacturerStrIndex   = STRING_ID_Manufacturer,
 	.ProductStrIndex        = STRING_ID_Product,
-	.SerialNumStrIndex      = NO_DESCRIPTOR,
+	.SerialNumStrIndex      = STRING_ID_Serial,
 
 	.NumberOfConfigurations = FIXED_NUM_CONFIGURATIONS
 };
@@ -176,6 +192,8 @@ const USB_Descriptor_String_t PROGMEM ManufacturerString = USB_STRING_DESCRIPTOR
  *  Descriptor.
  */
 const USB_Descriptor_String_t PROGMEM ProductString = USB_STRING_DESCRIPTOR(L"Glove VR Controller");
+
+const USB_Descriptor_String_t PROGMEM SerialString = USB_STRING_DESCRIPTOR(L"911129SYS");
 
 /** This function is called by the library when in device mode, and must be overridden (see library "USB Descriptors"
  *  documentation) by the application code so that the address and size of a requested descriptor can be given

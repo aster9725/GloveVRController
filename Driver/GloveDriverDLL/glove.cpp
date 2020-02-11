@@ -1,6 +1,7 @@
 #include "openvr_driver.h"
 #include "bones.h"
 #include "driverlog.h"
+#include "hid.h"
 #include <thread>
 #include <atomic>
 #include <chrono>
@@ -72,7 +73,7 @@ public:
         VRProperties()->SetStringProperty(props, Prop_SerialNumber_String, device_serial_number);
         VRProperties()->SetStringProperty(props, Prop_ModelNumber_String, device_model_number);
         VRProperties()->SetStringProperty(props, Prop_RenderModelName_String, device_render_model_name);
-        //VRProperties()->SetStringProperty(props, Prop_RenderModelName_String, "vr_controller_vive_1_5");
+        VRProperties()->SetStringProperty(props, Prop_RenderModelName_String, "vr_controller_vive_1_5");
         VRProperties()->SetStringProperty(props, Prop_ManufacturerName_String, device_manufacturer);
         VRProperties()->SetInt32Property(props, Prop_ControllerRoleHint_Int32, TrackedControllerRole_RightHand);
         VRProperties()->SetInt32Property(props, Prop_DeviceClass_Int32, (int32_t)TrackedDeviceClass_Controller);
@@ -91,6 +92,7 @@ public:
         m_active = true;
         m_pose_thread = std::thread(&RightHandTest::UpdatePoseThread, this);
         DriverLog("Dev] Glove Contorller Activated");
+        DriverLog("Dev] sizeof qData : %d", sizeof(qData));
         return VRInitError_None;
     }
 
@@ -118,6 +120,7 @@ public:
     // in this case we just offset from the hmd
     void UpdateControllerPose()
     {
+        static int index = 0;
         //if (!m_found_hmd)
         //{
         //    TrackedDevicePose_t hmd_pose;
@@ -137,6 +140,13 @@ public:
         //m_pose.vecPosition[0] = 0.1 * sin(pose_time_delta_seconds);
         //m_pose.vecPosition[1] = 0.1 * sin(pose_time_delta_seconds);
         //m_pose.vecPosition[2] = 0.1 * cos(pose_time_delta_seconds);
+        m_pose.qRotation.w = qData[index++];
+        m_pose.qRotation.z = qData[index++];
+        m_pose.qRotation.y = qData[index++];
+        m_pose.qRotation.x = -qData[index++];
+        if (index > sizeof(qData)/8)
+            index = 0;
+
         VRServerDriverHost()->TrackedDevicePoseUpdated(m_id, m_pose, sizeof(DriverPose_t));
     }
 
@@ -157,7 +167,7 @@ public:
             UpdateControllerPose();
             UpdateHandSkeletonPoses();
 
-            this_thread::sleep_for(chrono::milliseconds(11));
+            this_thread::sleep_for(chrono::milliseconds(10));
         }
     }
 };

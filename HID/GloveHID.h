@@ -48,8 +48,6 @@
 		#include "Config/AppConfig.h"
 
 		#include <LUFA/Drivers/USB/USB.h>
-//		#include <LUFA/Drivers/Board/LEDs.h>
-		#include <LUFA/Platform/Platform.h>
 
 	/* Data Structure */
 	typedef struct
@@ -57,9 +55,16 @@
 		int16_t accX;
 		int16_t accY;
 		int16_t accZ;
-		int16_t gyoX;
-		int16_t gyoY;
-		int16_t gyoZ;
+		
+		int16_t gyroX;
+		int16_t gyroY;
+		int16_t gyroZ;
+		
+		int16_t geoX;
+		int16_t geoY;
+		int16_t geoZ;
+		
+		uint8_t btn;
 	} USB_GloveReport_Data_t;
 
 	/* Function Prototypes: */

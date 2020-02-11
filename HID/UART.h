@@ -11,6 +11,10 @@
 
 #include <avr/io.h>
 
+#define START_CHAR	0x53 // 'S'
+#define END_CHAR	0x45 // 'E'
+
+
 void UART_INIT(int baud);
 unsigned char UART_receive(unsigned char block);
 void UART_transmit(unsigned char data);

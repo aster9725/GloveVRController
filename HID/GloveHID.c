@@ -28,19 +28,17 @@
   this software.
 */
 
-/** \file
- *
- *  Main source file for the GenericHID demo. This file contains the main tasks of the demo and
- *  is responsible for the initial application hardware configuration.
- */
 
 #include "GloveHID.h"
 #include "UART.h"
 
+#define FRD_READY		(1<<0)
+#define FRD_REPORTED	(1<<1)
+#define FRD_DIRTY		(1<<2)
 
-/** Main program entry point. This routine configures the hardware required by the application, then
- *  enters a loop to run the application tasks in sequence.
- */
+volatile uint8_t flagReportData = 0;	// FRD
+volatile USB_GloveReport_Data_t gGloveReportData = {0, };
+
 int main(void)
 {
 	SetupHardware();
@@ -55,7 +53,47 @@ int main(void)
 	}
 }
 
-/** Configures the board hardware and chip peripherals for the demo's functionality. */
+
+ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
+{
+	volatile uint8_t data;
+	volatile static uint8_t read_byte_cnt = 0;
+	volatile static uint16_t* pData = (uint16_t*)&(gGloveReportData.accX);
+	data = UDR1;
+	UART_transmit(data);
+	if (data == START_CHAR)
+	{
+		flagReportData &= ~(FRD_DIRTY);
+		flagReportData &= ~(FRD_READY);
+		pData = (uint16_t*)&(gGloveReportData.accX);
+		read_byte_cnt = 0;
+		return;
+	}
+	else if(data == END_CHAR)
+	{
+		if(read_byte_cnt == 18){
+			flagReportData &= ~(FRD_DIRTY);
+			flagReportData |= FRD_READY;	
+		}
+		else
+			flagReportData |= FRD_DIRTY;
+		return;
+	}
+	
+	if(flagReportData & FRD_DIRTY)
+		return;
+	
+	if(read_byte_cnt%2)
+	{
+		*pData |= data;
+		++pData;
+	}
+	else
+		*pData = data<<8;
+
+	++read_byte_cnt;
+}
+
 void SetupHardware(void)
 {
 	/* Disable watchdog if enabled by bootloader/fuses */
@@ -116,26 +154,26 @@ void EVENT_USB_Device_ControlRequest(void)
 		case HID_REQ_GetReport:
 			if (USB_ControlRequest.bmRequestType == (REQDIR_DEVICETOHOST | REQTYPE_CLASS | REQREC_INTERFACE))
 			{
-				USB_GloveReport_Data_t GloveReportData;
-				GetNextReport(&GloveReportData);
+				static USB_GloveReport_Data_t GloveReportData;
+				if(GetNextReport(&GloveReportData))
+				{
+					Endpoint_ClearSETUP();
 
-				Endpoint_ClearSETUP();
-
-				/* Write the report data to the control endpoint */
-				Endpoint_Write_Control_Stream_LE(&GloveReportData, sizeof(USB_GloveReport_Data_t));
-				Endpoint_ClearOUT();
+					/* Write the report data to the control endpoint */
+					Endpoint_Write_Control_Stream_LE(&GloveReportData, sizeof(USB_GloveReport_Data_t));
+					Endpoint_ClearOUT();
+				}
 			}
-
 			break;
 		case HID_REQ_SetReport:
 			if (USB_ControlRequest.bmRequestType == (REQDIR_HOSTTODEVICE | REQTYPE_CLASS | REQREC_INTERFACE))
 			{
-				USB_GloveReport_Data_t GloveReportData;
+				USB_GloveReport_Data_t GloveReportData_temp;
 
 				Endpoint_ClearSETUP();
 
 				/* Read the report data from the control endpoint */
-				Endpoint_Read_Control_Stream_LE(&GloveReportData, sizeof(USB_GloveReport_Data_t));
+				Endpoint_Read_Control_Stream_LE(&GloveReportData_temp, sizeof(USB_GloveReport_Data_t));
 				Endpoint_ClearIN();
 
 //				ProcessGenericHIDReport(&GloveReportData);	// Do something for input data
@@ -157,15 +195,25 @@ void ProcessGenericHIDReport(uint8_t* DataArray)
 
 bool GetNextReport(USB_GloveReport_Data_t* const ReportData)
 {
-	ReportData->accX = 10;
-	ReportData->accY = 10;
-	ReportData->accZ = 10;
-
-	ReportData->gyoX = 999;
-	ReportData->gyoY = 999;
-	ReportData->gyoZ = 999;
-
-	return true;
+	if(flagReportData & FRD_READY)
+	{
+		ReportData->accX = gGloveReportData.accX;
+		ReportData->accY = gGloveReportData.accX;
+		ReportData->accZ = gGloveReportData.accX;
+		
+		ReportData->gyroX = gGloveReportData.gyroX;
+		ReportData->gyroY = gGloveReportData.gyroY;
+		ReportData->gyroZ = gGloveReportData.gyroZ;
+		
+		ReportData->geoX = gGloveReportData.geoX;
+		ReportData->geoY = gGloveReportData.geoY;
+		ReportData->geoZ = gGloveReportData.geoZ;
+		
+		ReportData->btn = 0;
+		flagReportData &= ~(FRD_READY);
+		return true;
+	}
+	return false;
 }
 
 void HID_Task(void)
@@ -183,10 +231,10 @@ void HID_Task(void)
 		if (Endpoint_IsReadWriteAllowed())
 		{
 			/* Create a temporary buffer to hold the read in report from the host */
-			USB_GloveReport_Data_t GloveReportData;
+			USB_GloveReport_Data_t GloveReportData_temp;
 
 			/* Read Generic Report Data */
-			Endpoint_Read_Stream_LE(&GloveReportData, sizeof(USB_GloveReport_Data_t), NULL);
+			Endpoint_Read_Stream_LE(&GloveReportData_temp, sizeof(USB_GloveReport_Data_t), NULL);
 			UART_printString("[ReportData Read] \n\r");
 
 			/* Process Generic Report Data */
@@ -203,31 +251,41 @@ void HID_Task(void)
 	if (Endpoint_IsINReady())
 	{
 		/* Create a temporary buffer to hold the report to send to the host */
-		USB_GloveReport_Data_t GloveReportData;
+		static USB_GloveReport_Data_t GloveReportData;
 
 		/* Create Generic Report Data */
-		GetNextReport(&GloveReportData);
+		if(GetNextReport(&GloveReportData))
+		{
 		
-		UART_printString("[ReportData Write] \n\r");
-		UART_printString("\tAcc [ X:Y:Z ] | [ ");
-		UART_printUINT(GloveReportData.accX);
-		UART_printUINT(GloveReportData.accY);
-		UART_printUINT(GloveReportData.accZ);
-		UART_printString(" ]\n\r");
-		UART_printString("\tGyro [ X:Y:Z ] | [ ");
-		UART_printUINT(GloveReportData.gyoX);
-		UART_printUINT(GloveReportData.gyoY);
-		UART_printUINT(GloveReportData.gyoZ);
-		UART_printString(" ]\n\r");
+			UART_printString("[ReportData Write] \n\r");
+			UART_printString("\tAcc  [ X:Y:Z ] | [ ");
+			UART_printUINT(GloveReportData.accX);
+			UART_printString(" : ");
+			UART_printUINT(GloveReportData.accY);
+			UART_printString(" : ");
+			UART_printUINT(GloveReportData.accZ);
+			UART_printString(" ]\n\r");
+			UART_printString("\tGyro [ X:Y:Z ] | [ ");
+			UART_printUINT(GloveReportData.gyroX);
+			UART_printString(" : ");
+			UART_printUINT(GloveReportData.gyroY);
+			UART_printString(" : ");
+			UART_printUINT(GloveReportData.gyroZ);
+			UART_printString(" ]\n\r");
+			UART_printString("\tGeo  [ X:Y:Z ] | [ ");
+			UART_printUINT(GloveReportData.geoX);
+			UART_printString(" : ");
+			UART_printUINT(GloveReportData.geoY);
+			UART_printString(" : ");
+			UART_printUINT(GloveReportData.geoZ);
+			UART_printString(" ]\n\r");
 
-		/* Write Generic Report Data */
-		Endpoint_Write_Stream_LE(&GloveReportData, sizeof(USB_GloveReport_Data_t), NULL);
+			/* Write Generic Report Data */
+			Endpoint_Write_Stream_LE(&GloveReportData, sizeof(USB_GloveReport_Data_t), NULL);
 
-		/* Finalize the stream transfer to send the last packet */
-		Endpoint_ClearIN();
-
-		/* Clear report data (Cleaning Stack?)*/
-		memset(&GloveReportData, 0, sizeof(USB_GloveReport_Data_t));
+			/* Finalize the stream transfer to send the last packet */
+			Endpoint_ClearIN();
+		}
 	}
 }
 
