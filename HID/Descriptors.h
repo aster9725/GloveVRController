@@ -41,7 +41,7 @@
 
 		#include <avr/pgmspace.h>
 
-//		#include "Config/AppConfig.h"
+		#include "Config/AppConfig.h"
 
 	/* Type Defines: */
 		/** Type define for the device configuration descriptor structure. This must be defined in the
@@ -81,7 +81,8 @@
 
 	/* Macros: */
 		/** Endpoint address of the Generic HID reporting IN endpoint. */
-		#define GLOVE_EPADDR         	(ENDPOINT_DIR_IN  | 1)
+		#define GLOVE_IN_EPADDR         	(ENDPOINT_DIR_IN  | 1)
+		#define GLOVE_OUT_EPADDR			(ENDPOINT_DIR_OUT | 2)
 
 		/** Size in bytes of the Generic HID reporting endpoint. */
 		#define GLOVE_EPSIZE				8

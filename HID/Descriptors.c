@@ -45,23 +45,22 @@
  */
 const USB_Descriptor_HIDReport_Datatype_t PROGMEM GloveReport[] =
 {
-    0x05, 0x03,                    // USAGE_PAGE (VR Controls)
-    0x09, 0x04,                    // USAGE (Glove)
-    0x16, 0x00, 0x80,              // LOGICAL_MINIMUM (-32768)
-    0x26, 0xff, 0x7f,              // LOGICAL_MAXIMUM (32767)
-    0x35, 0xfc,                    // PHYSICAL_MINIMUM (-4)
-    0x45, 0x04,                    // PHYSICAL_MAXIMUM (4)
-    0x95, 0x03,                    // REPORT_COUNT (3)
-    0x75, 0x10,                    // REPORT_SIZE (16)
-    0x81, 0x02,                    // INPUT (Data,Var,Abs)
-    0x09, 0x04,                    // USAGE (Glove)
-    0x16, 0x00, 0x80,              // LOGICAL_MINIMUM (-32768)
-    0x26, 0xff, 0x7f,              // LOGICAL_MAXIMUM (32767)
-    0x35, 0x00,                    // PHYSICAL_MINIMUM (0)
-    0x46, 0xd0, 0x07,              // PHYSICAL_MAXIMUM (2000)
-    0x95, 0x03,                    // REPORT_COUNT (3)
-    0x75, 0x10,                    // REPORT_SIZE (16)
-    0x81, 0x02                     // INPUT (Data,Var,Abs)
+    0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
+    0x09, 0x04,                    // USAGE (Joystick)
+    0xa1, 0x01,                    // COLLECTION (Application)
+    0x85, 0x06,                    //   REPORT_ID (6)
+    0x05, 0x03,                    //   USAGE_PAGE (VR Controls)
+    0xa1, 0x00,                    //   COLLECTION (Physical)
+    0x09, 0x04,                    //     USAGE (Glove)
+    0x16, 0x00, 0x80,              //     LOGICAL_MINIMUM (-32768)
+    0x26, 0xff, 0x7f,              //     LOGICAL_MAXIMUM (32767)
+    0x35, 0xfc,                    //     PHYSICAL_MINIMUM (-4)
+    0x45, 0x04,                    //     PHYSICAL_MAXIMUM (4)
+    0x95, 0x03,                    //     REPORT_COUNT (3)
+    0x75, 0x10,                    //     REPORT_SIZE (16)
+    0x81, 0x02,                    //     INPUT (Data,Var,Abs)
+    0xc0,                          //     END_COLLECTION
+    0xc0                           // END_COLLECTION
 };
 
 /** Device descriptor structure. This descriptor, located in FLASH memory, describes the overall
@@ -120,7 +119,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.InterfaceNumber        = INTERFACE_ID_GloveHID,
 			.AlternateSetting       = 0x00,
 
-			.TotalEndpoints         = 1,
+			.TotalEndpoints         = 2,
 
 			.Class                  = HID_CSCP_HIDClass,
 			.SubClass               = HID_CSCP_NonBootSubclass,
@@ -144,11 +143,20 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
 
-			.EndpointAddress        = GLOVE_EPADDR,
+			.EndpointAddress        = GLOVE_IN_EPADDR,
 			.Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
 			.EndpointSize           = GLOVE_EPSIZE,
 			.PollingIntervalMS      = 0x05
 		},
+	.HID_ReportOUTEndpoint =
+		{
+			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
+
+			.EndpointAddress        = GLOVE_OUT_EPADDR,
+			.Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
+			.EndpointSize           = GLOVE_EPSIZE,
+			.PollingIntervalMS      = 0x05
+		}
 };
 
 /** Language descriptor structure. This descriptor, located in FLASH memory, is returned when the host requests
@@ -167,7 +175,7 @@ const USB_Descriptor_String_t PROGMEM ManufacturerString = USB_STRING_DESCRIPTOR
  *  and is read out upon request by the host when the appropriate string ID is requested, listed in the Device
  *  Descriptor.
  */
-const USB_Descriptor_String_t PROGMEM ProductString = USB_STRING_DESCRIPTOR(L"Glove VR HID");
+const USB_Descriptor_String_t PROGMEM ProductString = USB_STRING_DESCRIPTOR(L"Glove VR Controller");
 
 /** This function is called by the library when in device mode, and must be overridden (see library "USB Descriptors"
  *  documentation) by the application code so that the address and size of a requested descriptor can be given

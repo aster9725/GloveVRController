@@ -64,14 +64,12 @@ void SetupHardware(void)
 
 	/* Disable clock division */
 	clock_prescale_set(clock_div_1);
-
-	/* Hardware Initialization */
-	USB_Init();
-
+	
 	/* Serial Initialization */
 	UART_INIT(9600);
 
-
+	/* Hardware Initialization */
+	USB_Init();
 }
 
 /** Event handler for the USB_Connect event. This indicates that the device is enumerating via the status LEDs and
@@ -100,8 +98,8 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 	bool ConfigSuccess = true;
 
 	/* Setup HID Report Endpoints */
-	ConfigSuccess &= Endpoint_ConfigureEndpoint(GLOVE_EPADDR, EP_TYPE_INTERRUPT, GLOVE_EPSIZE, 1);
-//	ConfigSuccess &= Endpoint_ConfigureEndpoint(GENERIC_OUT_EPADDR, EP_TYPE_INTERRUPT, GENERIC_EPSIZE, 1);
+	ConfigSuccess &= Endpoint_ConfigureEndpoint(GLOVE_IN_EPADDR, EP_TYPE_INTERRUPT, GLOVE_EPSIZE, 1);
+	ConfigSuccess &= Endpoint_ConfigureEndpoint(GLOVE_OUT_EPADDR, EP_TYPE_INTERRUPT, GLOVE_EPSIZE, 1);
 
 	/* Indicate endpoint configuration success or failure */
 }
@@ -124,12 +122,37 @@ void EVENT_USB_Device_ControlRequest(void)
 				Endpoint_ClearSETUP();
 
 				/* Write the report data to the control endpoint */
-				Endpoint_Write_Control_Stream_LE(&GloveReportData, sizeof(GloveReportData));
+				Endpoint_Write_Control_Stream_LE(&GloveReportData, sizeof(USB_GloveReport_Data_t));
 				Endpoint_ClearOUT();
 			}
 
 			break;
+		case HID_REQ_SetReport:
+			if (USB_ControlRequest.bmRequestType == (REQDIR_HOSTTODEVICE | REQTYPE_CLASS | REQREC_INTERFACE))
+			{
+				USB_GloveReport_Data_t GloveReportData;
+
+				Endpoint_ClearSETUP();
+
+				/* Read the report data from the control endpoint */
+				Endpoint_Read_Control_Stream_LE(&GloveReportData, sizeof(USB_GloveReport_Data_t));
+				Endpoint_ClearIN();
+
+//				ProcessGenericHIDReport(&GloveReportData);	// Do something for input data
+			}
+
+			break;
 	}
+}
+
+void ProcessGenericHIDReport(uint8_t* DataArray)
+{
+	/*
+		This is where you need to process reports sent from the host to the device. This
+		function is called each time the host has sent a new report. DataArray is an array
+		holding the report sent from the host.
+	*/
+
 }
 
 bool GetNextReport(USB_GloveReport_Data_t* const ReportData)
@@ -150,8 +173,31 @@ void HID_Task(void)
 	/* Device must be connected and configured for the task to run */
 	if (USB_DeviceState != DEVICE_STATE_Configured)
 	  return;
+	  
+	Endpoint_SelectEndpoint(GLOVE_OUT_EPADDR);
 
-	Endpoint_SelectEndpoint(GLOVE_EPADDR);
+	/* Check to see if a packet has been sent from the host */
+	if (Endpoint_IsOUTReceived())
+	{
+		/* Check to see if the packet contains data */
+		if (Endpoint_IsReadWriteAllowed())
+		{
+			/* Create a temporary buffer to hold the read in report from the host */
+			USB_GloveReport_Data_t GloveReportData;
+
+			/* Read Generic Report Data */
+			Endpoint_Read_Stream_LE(&GloveReportData, sizeof(USB_GloveReport_Data_t), NULL);
+			UART_printString("[ReportData Read] \n\r");
+
+			/* Process Generic Report Data */
+//			ProcessGenericHIDReport(GloveReportData);
+		}
+
+		/* Finalize the stream transfer to send the last packet */
+		Endpoint_ClearOUT();
+	}
+
+	Endpoint_SelectEndpoint(GLOVE_IN_EPADDR);
 
 	/* Check to see if the host is ready to accept another packet */
 	if (Endpoint_IsINReady())
@@ -162,7 +208,7 @@ void HID_Task(void)
 		/* Create Generic Report Data */
 		GetNextReport(&GloveReportData);
 		
-		UART_printString("ReportData: \n\r");
+		UART_printString("[ReportData Write] \n\r");
 		UART_printString("\tAcc [ X:Y:Z ] | [ ");
 		UART_printUINT(GloveReportData.accX);
 		UART_printUINT(GloveReportData.accY);
@@ -175,13 +221,13 @@ void HID_Task(void)
 		UART_printString(" ]\n\r");
 
 		/* Write Generic Report Data */
-		Endpoint_Write_Stream_LE(&GloveReportData, sizeof(GloveReportData), NULL);
+		Endpoint_Write_Stream_LE(&GloveReportData, sizeof(USB_GloveReport_Data_t), NULL);
 
 		/* Finalize the stream transfer to send the last packet */
 		Endpoint_ClearIN();
 
 		/* Clear report data (Cleaning Stack?)*/
-		memset(&GloveReportData, 0, sizeof(GloveReportData));
+		memset(&GloveReportData, 0, sizeof(USB_GloveReport_Data_t));
 	}
 }
 
