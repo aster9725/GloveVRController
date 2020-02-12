@@ -24,7 +24,7 @@
     <ClCompile Include="glove.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="hid.c">
+    <ClCompile Include="hid.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

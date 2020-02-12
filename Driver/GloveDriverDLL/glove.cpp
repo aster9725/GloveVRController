@@ -24,7 +24,7 @@ static const char* device_input_profile_path = "{" DEVICE_NAME "}/input/" DEVICE
 //  As a test, all this device does it sets itself up, and published a fixed 
 //  controller pose and alternates between two hand skeleton poses.
 ////////////////////////////////////////////////////////////////////////////////////
-class RightHandTest : public ITrackedDeviceServerDriver
+class RightHandTest : public ITrackedDeviceServerDriver, public GloveHID
 {
 public:
     uint32_t m_id;
@@ -39,11 +39,20 @@ public:
         :   m_frame_count(0),
             m_found_hmd(false),
             m_active(false)
-    {}
+    {
+        m_id = 0;
+        m_pose = { 0 };
+        m_skeleton = 0;
+    }
 
 
     EVRInitError Activate(uint32_t unObjectId) override
     {
+
+        
+        if(getHID())
+            DriverLog("Dev] Glove Contorller Found VID : %d PID : %d", getHID()->Attributes.VendorID, getHID()->Attributes.ProductID);
+
         m_id = unObjectId;
         m_pose = { 0 };
         m_pose.poseIsValid = true;
@@ -92,7 +101,7 @@ public:
         m_active = true;
         m_pose_thread = std::thread(&RightHandTest::UpdatePoseThread, this);
         DriverLog("Dev] Glove Contorller Activated");
-        DriverLog("Dev] sizeof qData : %d", sizeof(qData));
+        //DriverLog("Dev] sizeof qData : %d", sizeof(qData));
         return VRInitError_None;
     }
 
@@ -140,12 +149,12 @@ public:
         //m_pose.vecPosition[0] = 0.1 * sin(pose_time_delta_seconds);
         //m_pose.vecPosition[1] = 0.1 * sin(pose_time_delta_seconds);
         //m_pose.vecPosition[2] = 0.1 * cos(pose_time_delta_seconds);
-        m_pose.qRotation.w = qData[index++];
-        m_pose.qRotation.z = qData[index++];
-        m_pose.qRotation.y = qData[index++];
-        m_pose.qRotation.x = -qData[index++];
-        if (index > sizeof(qData)/8)
-            index = 0;
+        //m_pose.qRotation.w = qData[index++];
+        //m_pose.qRotation.z = qData[index++];
+        //m_pose.qRotation.y = qData[index++];
+        //m_pose.qRotation.x = -qData[index++];
+        //if (index > sizeof(qData)/8)
+        //    index = 0;
 
         VRServerDriverHost()->TrackedDevicePoseUpdated(m_id, m_pose, sizeof(DriverPose_t));
     }
