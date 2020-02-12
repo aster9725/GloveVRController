@@ -1,7 +1,6 @@
 #include "openvr_driver.h"
 #include "bones.h"
 #include "driverlog.h"
-#include "hid.h"
 #include <thread>
 #include <atomic>
 #include <chrono>
@@ -39,13 +38,14 @@ public:
         :   m_frame_count(0),
             m_found_hmd(false),
             m_active(false)
-    {}
+    {
+        m_pose = { 0 };
+    }
 
 
     EVRInitError Activate(uint32_t unObjectId) override
     {
         m_id = unObjectId;
-        m_pose = { 0 };
         m_pose.poseIsValid = true;
         m_pose.result = TrackingResult_Running_OK;
         m_pose.deviceIsConnected = true;
@@ -92,7 +92,6 @@ public:
         m_active = true;
         m_pose_thread = std::thread(&RightHandTest::UpdatePoseThread, this);
         DriverLog("Dev] Glove Contorller Activated");
-        DriverLog("Dev] sizeof qData : %d", sizeof(qData));
         return VRInitError_None;
     }
 
@@ -140,12 +139,7 @@ public:
         //m_pose.vecPosition[0] = 0.1 * sin(pose_time_delta_seconds);
         //m_pose.vecPosition[1] = 0.1 * sin(pose_time_delta_seconds);
         //m_pose.vecPosition[2] = 0.1 * cos(pose_time_delta_seconds);
-        m_pose.qRotation.w = qData[index++];
-        m_pose.qRotation.z = qData[index++];
-        m_pose.qRotation.y = qData[index++];
-        m_pose.qRotation.x = -qData[index++];
-        if (index > sizeof(qData)/8)
-            index = 0;
+
 
         VRServerDriverHost()->TrackedDevicePoseUpdated(m_id, m_pose, sizeof(DriverPose_t));
     }
