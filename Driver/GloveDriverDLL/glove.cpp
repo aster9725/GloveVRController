@@ -15,6 +15,8 @@ extern "C" {
 
 #define DEVICE_NAME "glove"
 
+static LIST               PhysicalDeviceList;
+
 static const char* device_manufacturer = "sean";
 static const char *device_controller_type = DEVICE_NAME;
 static const char* device_model_number = DEVICE_NAME "1";
@@ -36,7 +38,7 @@ public:
     int m_frame_count;
     bool m_found_hmd;
     atomic<bool> m_active;
-    thread m_pose_thread;
+    thread m_pose_thread, m_hid_thread;
     PHID_DEVICE gloveHID;
 
     RightHandTest()
@@ -47,10 +49,6 @@ public:
         m_id = 0;
         m_pose = { 0 };
         m_skeleton = 0;
-        if (!FindKnownHidDevice(gloveHID))
-        {
-            gloveHID = NULL;
-        }
     }
 
 
@@ -103,10 +101,9 @@ public:
             &m_skeleton);
         m_active = true;
         m_pose_thread = std::thread(&RightHandTest::UpdatePoseThread, this);
-        if (gloveHID)
-            DriverLog("Dev] Glove Contorller Found VID : %d PID : %d", gloveHID->Attributes.VendorID, gloveHID->Attributes.ProductID);
+        
         DriverLog("Dev] Glove Contorller Activated");
-        //DriverLog("Dev] sizeof qData : %d", sizeof(qData));
+        
         return VRInitError_None;
     }
 
@@ -154,12 +151,7 @@ public:
         //m_pose.vecPosition[0] = 0.1 * sin(pose_time_delta_seconds);
         //m_pose.vecPosition[1] = 0.1 * sin(pose_time_delta_seconds);
         //m_pose.vecPosition[2] = 0.1 * cos(pose_time_delta_seconds);
-        //m_pose.qRotation.w = qData[index++];
-        //m_pose.qRotation.z = qData[index++];
-        //m_pose.qRotation.y = qData[index++];
-        //m_pose.qRotation.x = -qData[index++];
-        //if (index > sizeof(qData)/8)
-        //    index = 0;
+
 
         VRServerDriverHost()->TrackedDevicePoseUpdated(m_id, m_pose, sizeof(DriverPose_t));
     }
@@ -175,6 +167,14 @@ public:
 
     void UpdatePoseThread()
     {
+
+        if (FindKnownHidDevice(gloveHID))
+        {
+            if(gloveHID)
+                DriverLog("Dev] Glove Contorller Founded VID: %d    PID: %d", gloveHID->Attributes.VendorID, gloveHID->Attributes.ProductID);
+            else
+                DriverLog("Dev] Glove Contorller Not Founded");
+        }
         while (m_active)
         {
             m_frame_count++;

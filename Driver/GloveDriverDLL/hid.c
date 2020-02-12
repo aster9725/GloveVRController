@@ -187,6 +187,8 @@ Routine Description:
 
     HidD_GetHidGuid(&hidGuid);
 
+    
+
     HidDevice = NULL;
 
     //
@@ -197,7 +199,7 @@ Routine Description:
         NULL, // Define no
         (DIGCF_PRESENT | // Only Devices present
             DIGCF_DEVICEINTERFACE)); // Function class devices.
-
+    
     if (INVALID_HANDLE_VALUE == hardwareDeviceInfo)
     {
         goto Done;
@@ -212,12 +214,13 @@ Routine Description:
 
     while (!done)
     {
+        if (!HidDevice) {
+            HidDevice = (PHID_DEVICE)calloc(1, sizeof(HID_DEVICE));
 
-        HidDevice = (PHID_DEVICE)calloc(1, sizeof(HID_DEVICE));
-
-        if (NULL == HidDevice)
-        {
-            goto Done;
+            if (NULL == HidDevice)
+            {
+                goto Done;
+            }
         }
 
         hidDeviceInst = HidDevice;
@@ -228,13 +231,13 @@ Routine Description:
             // Initialize an empty HID_DEVICE
             //
             RtlZeroMemory(hidDeviceInst, sizeof(HID_DEVICE));
-
+            
             hidDeviceInst->HidDevice = INVALID_HANDLE_VALUE;
 
             if (SetupDiEnumDeviceInterfaces(hardwareDeviceInfo,
                 0, // No care about specific PDOs
                 &hidGuid,
-                i,
+                i++,
                 &deviceInfoData))
             {
                 //
@@ -250,7 +253,7 @@ Routine Description:
                     &requiredLength,
                     NULL); // not interested in the specific dev-node
 
-
+                
                 predictedLength = requiredLength;
 
                 functionClassDeviceData = (PSP_DEVICE_INTERFACE_DETAIL_DATA)malloc(predictedLength);
@@ -316,7 +319,6 @@ Routine Description:
             {
                 if (ERROR_NO_MORE_ITEMS == GetLastError())
                 {
-                    done = TRUE;
                     break;
                 }
             }

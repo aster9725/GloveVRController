@@ -7,6 +7,14 @@
 
 #define ASSERT(x)
 
+typedef LIST_ENTRY      LIST_NODE_HDR, * PLIST_NODE_HDR;
+typedef LIST_NODE_HDR   LIST, * PLIST;
+
+typedef VOID PLIST_CALLBACK(PLIST_NODE_HDR);
+
+#define InitializeList(nl) \
+        { ((PLIST)(nl)) -> Flink = ((PLIST)(nl)) -> Blink = nl; }
+
 typedef struct _SP_FNCLASS_DEVICE_DATA {
     DWORD cbSize;
     GUID  FunctionClassGuid;
