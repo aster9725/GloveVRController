@@ -83,92 +83,78 @@ typedef struct _HID_DEVICE {
 } HID_DEVICE, * PHID_DEVICE;
 
 
-class GloveHID
-{
-private:
-    PHID_DEVICE gloveDev;
+BOOLEAN
+OpenHidDevice(
+    _In_     STRSAFE_LPSTR DevicePath,
+    _In_     BOOL           HasReadAccess,
+    _In_     BOOL           HasWriteAccess,
+    _In_     BOOL           IsOverlapped,
+    _In_     BOOL           IsExclusive,
+    _Out_    PHID_DEVICE    HidDevice
+);
 
-public:
-    GloveHID() { 
-        if (!FindKnownHidDevice(gloveDev))
-            gloveDev = NULL;
-    };
+BOOLEAN
+FindKnownHidDevice(
+    OUT PHID_DEVICE HidDevices // A array of struct _HID_DEVICE
+);
 
-    PHID_DEVICE getHID() { return gloveDev; };
+BOOLEAN
+FillDeviceInfo(
+    IN  PHID_DEVICE HidDevice
+);
 
-    BOOLEAN
-    OpenHidDevice(
-        _In_     STRSAFE_LPSTR DevicePath,
-        _In_     BOOL           HasReadAccess,
-        _In_     BOOL           HasWriteAccess,
-        _In_     BOOL           IsOverlapped,
-        _In_     BOOL           IsExclusive,
-        _Out_    PHID_DEVICE    HidDevice
-    );
-
-    BOOLEAN
-    FindKnownHidDevice(
-        OUT PHID_DEVICE HidDevices // A array of struct _HID_DEVICE
-    );
-
-    BOOLEAN
-    FillDeviceInfo(
-        IN  PHID_DEVICE HidDevice
-    );
-
-    VOID
-    CloseHidDevice(
-        IN PHID_DEVICE   HidDevice
-    );
+VOID
+CloseHidDevice(
+    IN PHID_DEVICE   HidDevice
+);
 
 
-    BOOLEAN
-    Read(
-        PHID_DEVICE    HidDevice
-    );
+BOOLEAN
+Read(
+    PHID_DEVICE    HidDevice
+);
 
-    BOOLEAN
-    ReadOverlapped(
-        PHID_DEVICE     HidDevice,
-        HANDLE          CompletionEvent,
-        LPOVERLAPPED    Overlap
-    );
+BOOLEAN
+ReadOverlapped(
+    PHID_DEVICE     HidDevice,
+    HANDLE          CompletionEvent,
+    LPOVERLAPPED    Overlap
+);
 
-    BOOLEAN
-    Write(
-        PHID_DEVICE    HidDevice
-    );
+BOOLEAN
+Write(
+    PHID_DEVICE    HidDevice
+);
 
-    BOOLEAN
-    UnpackReport(
-        _In_reads_bytes_(ReportBufferLength)PCHAR ReportBuffer,
-        IN       USHORT               ReportBufferLength,
-        IN       HIDP_REPORT_TYPE     ReportType,
-        IN OUT   PHID_DATA            Data,
-        IN       ULONG                DataLength,
-        IN       PHIDP_PREPARSED_DATA Ppd
-    );
+BOOLEAN
+UnpackReport(
+    _In_reads_bytes_(ReportBufferLength)PCHAR ReportBuffer,
+    IN       USHORT               ReportBufferLength,
+    IN       HIDP_REPORT_TYPE     ReportType,
+    IN OUT   PHID_DATA            Data,
+    IN       ULONG                DataLength,
+    IN       PHIDP_PREPARSED_DATA Ppd
+);
 
-    BOOLEAN
-    PackReport(
-        _Out_writes_bytes_(ReportBufferLength)PCHAR ReportBuffer,
-        IN       USHORT               ReportBufferLength,
-        IN       HIDP_REPORT_TYPE     ReportType,
-        IN       PHID_DATA            Data,
-        IN       ULONG                DataLength,
-        IN       PHIDP_PREPARSED_DATA Ppd
-    );
+BOOLEAN
+PackReport(
+    _Out_writes_bytes_(ReportBufferLength)PCHAR ReportBuffer,
+    IN       USHORT               ReportBufferLength,
+    IN       HIDP_REPORT_TYPE     ReportType,
+    IN       PHID_DATA            Data,
+    IN       ULONG                DataLength,
+    IN       PHIDP_PREPARSED_DATA Ppd
+);
 
-    BOOLEAN
-    SetFeature(
-        PHID_DEVICE    HidDevice
-    );
+BOOLEAN
+SetFeature(
+    PHID_DEVICE    HidDevice
+);
 
-    BOOLEAN
-    GetFeature(
-        PHID_DEVICE    HidDevice
-    );
-};
+BOOLEAN
+GetFeature(
+    PHID_DEVICE    HidDevice
+);
 
 //double qData[] = {
 //0.988984	,	-0.098494	,	-0.077762	,	-0.052829,

@@ -22,7 +22,7 @@
     <ClCompile Include="bones.cpp" />
     <ClCompile Include="driverlog.cpp" />
     <ClCompile Include="glove.cpp" />
-    <ClCompile Include="hid.cpp" />
+    <ClCompile Include="hid.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bones.h" />

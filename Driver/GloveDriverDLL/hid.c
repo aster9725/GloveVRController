@@ -9,7 +9,7 @@
 #pragma warning(disable:28146) // Warning is meant for kernel mode drivers 
 
 BOOLEAN
-GloveHID::OpenHidDevice(
+OpenHidDevice(
     _In_     STRSAFE_LPSTR DevicePath,
     _In_     BOOL           HasReadAccess,
     _In_     BOOL           HasWriteAccess,
@@ -164,7 +164,7 @@ Done:
 }
 
 BOOLEAN
-GloveHID::FindKnownHidDevice(
+FindKnownHidDevice(
     OUT PHID_DEVICE HidDevice // A array of struct _HID_DEVICE
 )
 /*++
@@ -343,7 +343,7 @@ Done:
 }
 
 BOOLEAN
-GloveHID::FillDeviceInfo(
+FillDeviceInfo(
     IN  PHID_DEVICE HidDevice
 )
 {
@@ -842,7 +842,7 @@ Done:
 }
 
 VOID
-GloveHID::CloseHidDevice(
+CloseHidDevice(
     IN PHID_DEVICE HidDevice
 )
 {
@@ -940,7 +940,7 @@ GloveHID::CloseHidDevice(
 }
 
 BOOLEAN
-GloveHID::Read(
+Read(
     PHID_DEVICE    HidDevice
 )
 /*++
@@ -978,7 +978,7 @@ Done:
 }
 
 BOOLEAN
-GloveHID::ReadOverlapped(
+ReadOverlapped(
     PHID_DEVICE     HidDevice,
     HANDLE          CompletionEvent,
     LPOVERLAPPED    Overlap
@@ -1042,7 +1042,7 @@ RoutineDescription:
 }
 
 BOOLEAN
-GloveHID::Write(
+Write(
     PHID_DEVICE    HidDevice
 )
 /*++
@@ -1115,7 +1115,7 @@ RoutineDescription:
 }
 
 BOOLEAN
-GloveHID::SetFeature(
+SetFeature(
     PHID_DEVICE    HidDevice
 )
 /*++
@@ -1183,7 +1183,7 @@ pack it into multiple reports and send it to the hid device via HidD_SetFeature(
 }
 
 BOOLEAN
-GloveHID::GetFeature(
+GetFeature(
     PHID_DEVICE    HidDevice
 )
 /*++
@@ -1264,7 +1264,7 @@ RoutineDescription:
 
 
 BOOLEAN
-GloveHID::UnpackReport(
+UnpackReport(
     _In_reads_bytes_(ReportBufferLength)PCHAR ReportBuffer,
     IN       USHORT               ReportBufferLength,
     IN       HIDP_REPORT_TYPE     ReportType,
@@ -1399,7 +1399,7 @@ Done:
 
 
 BOOLEAN
-GloveHID::PackReport(
+PackReport(
     _Out_writes_bytes_(ReportBufferLength)PCHAR ReportBuffer,
     IN  USHORT               ReportBufferLength,
     IN  HIDP_REPORT_TYPE     ReportType,

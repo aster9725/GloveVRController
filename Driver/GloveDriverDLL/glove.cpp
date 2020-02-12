@@ -1,7 +1,6 @@
 #include "openvr_driver.h"
 #include "bones.h"
 #include "driverlog.h"
-#include "hid.h"
 #include <thread>
 #include <atomic>
 #include <chrono>
@@ -9,6 +8,10 @@
 
 using namespace vr;
 using namespace std;
+
+extern "C" {
+#include "hid.h"
+}
 
 #define DEVICE_NAME "glove"
 
@@ -24,7 +27,7 @@ static const char* device_input_profile_path = "{" DEVICE_NAME "}/input/" DEVICE
 //  As a test, all this device does it sets itself up, and published a fixed 
 //  controller pose and alternates between two hand skeleton poses.
 ////////////////////////////////////////////////////////////////////////////////////
-class RightHandTest : public ITrackedDeviceServerDriver, public GloveHID
+class RightHandTest : public ITrackedDeviceServerDriver
 {
 public:
     uint32_t m_id;
@@ -34,6 +37,7 @@ public:
     bool m_found_hmd;
     atomic<bool> m_active;
     thread m_pose_thread;
+    PHID_DEVICE gloveHID;
 
     RightHandTest()
         :   m_frame_count(0),
@@ -43,16 +47,15 @@ public:
         m_id = 0;
         m_pose = { 0 };
         m_skeleton = 0;
+        if (!FindKnownHidDevice(gloveHID))
+        {
+            gloveHID = NULL;
+        }
     }
 
 
     EVRInitError Activate(uint32_t unObjectId) override
     {
-
-        
-        if(getHID())
-            DriverLog("Dev] Glove Contorller Found VID : %d PID : %d", getHID()->Attributes.VendorID, getHID()->Attributes.ProductID);
-
         m_id = unObjectId;
         m_pose = { 0 };
         m_pose.poseIsValid = true;
@@ -100,6 +103,8 @@ public:
             &m_skeleton);
         m_active = true;
         m_pose_thread = std::thread(&RightHandTest::UpdatePoseThread, this);
+        if (gloveHID)
+            DriverLog("Dev] Glove Contorller Found VID : %d PID : %d", gloveHID->Attributes.VendorID, gloveHID->Attributes.ProductID);
         DriverLog("Dev] Glove Contorller Activated");
         //DriverLog("Dev] sizeof qData : %d", sizeof(qData));
         return VRInitError_None;
