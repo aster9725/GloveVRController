@@ -28,9 +28,31 @@ void MPU9250_init()
 	twi_write(0x67, 0x0F); //[I2C_MST_DELAY_CTRL]
 
 	twi_write(0x2E, 0x0C); //[I2C_SLV3_ADDR] AK8963 write
-    twi_write(0x2F, 0x0A); //[I2C_SLV3_REG]
-    twi_write(0x30, 0x81); //[I2C_SLV3_CTRL]
-    twi_write(0x66, 0x11); //[I2C_SLV3_DO]
+    twi_write(0x2F, 0x0A); //[I2C_SLV3_REG]		내부 레지스터 주소
+    twi_write(0x30, 0x81); //[I2C_SLV3_CTRL]	인터럽트 신호 발생 완료되면 비활성화 레지스터 54에서 확인가능	& 속도 감소 수식 : 1 / (1 + I2C_MST_DLY(17)) samples 
+    twi_write(0x66, 0x11); //[I2C_SLV3_DO]		슬레이브장치에 기록	DI는 읽기
+	
+	/*
+	I2C_SLV4_EN When set to 1, this bit enables Slave 4 for data transfer operations.
+	When cleared to 0, this bit disables Slave 4 from data transfer operations.
+	I2C_SLV4_INT_EN When set to 1, this bit enables the generation of an interrupt signal upon
+	completion of a Slave 4 transaction.
+	When cleared to 0, this bit disables the generation of an interrupt signal
+	upon completion of a Slave 4 transaction.
+	The interrupt status can be observed in Register 54.
+	I2C_SLV4_REG_DIS When set to 1, the transaction will read or write data.
+	When cleared to 0, the transaction will read or write a register address.
+	I2C_MST_DLY Configures the decreased access rate of slave devices relative to the
+	Sample Rate.
+	
+	I2C_MST_DLY configures the reduced access rate of I
+	2C slaves relative to the Sample Rate. When
+	a slave’s access rate is decreased relative to the Sample Rate, the slave is accessed every
+	1 / (1 + I2C_MST_DLY) samples
+	This base Sample Rate in turn is determined by SMPLRT_DIV (register 25) and DLPF_CFG
+	(register 26). Whether a slave’s access rate is reduced relative to the Sample Rate is determined by
+	I2C_MST_DELAY_CTRL (register 103).
+	*/
 
     twi_write(0x34, 0x13); //[I2C_SLV4_CTRL] 모든 slave 19+1번 샘플
 	

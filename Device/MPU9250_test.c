@@ -107,41 +107,6 @@ int main()
 		USART_Transmit(m_z_h);
 		USART_Transmit(m_z_l);
 		USART_Transmit('E');
-		
-		/*
-		USART_Transmit_init4(g_x);
-		USART_Transmit_init4(g_y);
-		USART_Transmit_init4(g_z);
-		
-		USART_Transmit_init4(g_x);
-		USART_Transmit_init4(g_y);
-		USART_Transmit_init4(g_z);
-		
-		USART_Transmit_init4(m_x);
-		USART_Transmit('\t');
-		USART_Transmit_init4(m_y);
-		USART_Transmit('\t');
-		USART_Transmit_init4(m_z);
-		USART_Transmit('\t');
-		USART_Transmit('E');
-		*/
-		/*temp = (m_x_h<<8) | m_x_l;
-		m_x = (float)temp*((ASAX+128.000)/256.000)-380;
-		temp = (m_y_h<<8) | m_y_l;
-		m_y = (float)temp*((ASAY+128.000)/256.000)+85;
-		temp = (m_z_h<<8) | m_z_l;
-		m_z = (float)temp*((ASAZ+128.000)/256.000)-325;
-		
-		USART_Transmit_init4(m_x);
-		USART_Transmit('\t');
-		USART_Transmit_init4(m_y);
-		USART_Transmit('\t');
-		USART_Transmit_init4(m_z);
-		
-		USART_Transmit('\n');*/
-		
-		//_delay_ms(1000);
-
 	} 
 
 } 
