@@ -78,7 +78,7 @@ public:
         m_pose.qDriverFromHeadRotation.y = 0;
         m_pose.qDriverFromHeadRotation.z = 0;
 
-        m_pose.vecPosition[0] = -0.5;
+        m_pose.vecPosition[0] = 0.5;
         m_pose.vecPosition[1] = -0.5;
         m_pose.vecPosition[2] = -1.0;
 
@@ -150,15 +150,18 @@ public:
 
     void UpdatePoseThread()
     {
-        PHID_DEVICE hidList;
+        PHID_DEVICE hidList = NULL;
         ULONG numDevices;
+        static HID_DEVICE asyncDevice;
+        BOOLEAN readAsync;
+
         if (FindKnownHidDevices(&hidList, &numDevices) == TRUE)
         {
             for (ULONG i = 0; i <= numDevices; i++)
             {
                 if ((hidList + i)->Attributes.VendorID == DEVICE_VID && (hidList + i)->Attributes.ProductID == DEVICE_PID) 
                 {
-                    gloveHID = (PHID_DEVICE)malloc(sizeof(HID_DEVICE));
+                    gloveHID = (PHID_DEVICE)calloc(1, sizeof(HID_DEVICE));
                     if (gloveHID)
                     {
                         memcpy(gloveHID, (hidList + i), sizeof(HID_DEVICE));
@@ -175,13 +178,56 @@ public:
         if (hidList)
             free(hidList);
 
-        while (m_active)
+        if (gloveHID)
         {
-            m_frame_count++;
-            UpdateControllerPose();
-            UpdateHandSkeletonPoses();
+            readAsync = OpenHidDevice(gloveHID->DevicePath, TRUE, FALSE, TRUE, FALSE, &asyncDevice);
+            if (readAsync)
+                DriverLog("Dev] Open Device Async Success");
+            else {
+                DriverLog("Dev] Open Device Async Failed");
+                return;
+            }
 
-            this_thread::sleep_for(chrono::milliseconds(10));
+            HANDLE  completionEvent;
+            BOOL    readResult;
+            DWORD   waitStatus;
+            ULONG   numReadsDone;
+            OVERLAPPED overlap;
+            DWORD      bytesTransferred;
+
+            completionEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+
+            if (completionEvent)
+            {
+                DriverLog("Dev] Create CompletionEvent Success");
+
+                numReadsDone = 0;
+                
+                while (m_active)
+                {
+                    readResult = ReadOverlapped(gloveHID, completionEvent, &overlap);
+                    if (readResult)
+                    {
+                        DriverLog("Dev] Read Device File Success");
+                    }
+                    else
+                    {
+                        DriverLog("Dev] Read Device File Failed");
+                        goto ASYNCREAD_END;
+                    }
+                    m_frame_count++;
+                    UpdateControllerPose();
+                    UpdateHandSkeletonPoses();
+
+                    this_thread::sleep_for(chrono::milliseconds(10));
+                }
+            }
+            else
+            {
+                DriverLog("Dev] Create CompletionEvent Failed");
+            }
+        ASYNCREAD_END:
+            CloseHidDevice(&asyncDevice);
         }
     }
 };
