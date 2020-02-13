@@ -68,7 +68,6 @@
 		int8_t enc_middle;
 		int8_t enc_ring;
 		int8_t enc_pinky;
-		
 		int8_t flex_thumb;
 		int8_t flex_index;
 		int8_t flex_middle;

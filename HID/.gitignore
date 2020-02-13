@@ -5,8 +5,3 @@
 *.lss
 *.map
 *.sym
-obj/
-.vs/
-GloveHID.atsln
-GloveHID.componentinfo.xml
-GloveHID.cproj

@@ -92,8 +92,8 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 
 	.Endpoint0Size          = FIXED_CONTROL_ENDPOINT_SIZE,
 
-	.VendorID               = 0x1991,
-	.ProductID              = 0x1129,
+	.VendorID               = 0x1993,
+	.ProductID              = 0x0624,
 	.ReleaseNumber          = VERSION_BCD(1,0,1),
 
 	.ManufacturerStrIndex   = STRING_ID_Manufacturer,
