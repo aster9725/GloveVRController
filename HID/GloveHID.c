@@ -38,12 +38,12 @@
 
 volatile uint8_t flagReportData = 0;	// FRD
 volatile USB_GloveReport_Data_t gGloveReportData = {0, };
+volatile uint8_t data;
 
 int main(void)
 {
 	SetupHardware();
 	
-	UART_printString("GloveHID Setup Start\n\r");
 	GlobalInterruptEnable();
 
 	for (;;)
@@ -53,10 +53,8 @@ int main(void)
 	}
 }
 
-
 ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
 {
-	volatile uint8_t data;
 	volatile static uint8_t read_byte_cnt = 0;
 	volatile static uint16_t* pXYZ = (uint16_t*)&(gGloveReportData.accX);
 	volatile static uint8_t* pEF = (uint8_t*)&(gGloveReportData.enc_index);
@@ -73,10 +71,11 @@ ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
 	{
 		if(read_byte_cnt == sizeof(USB_GloveReport_Data_t)){
 			flagReportData &= ~(FRD_DIRTY);
-			flagReportData |= FRD_READY;	
+			flagReportData |= FRD_READY;
 		}
-		else
+		else {
 			flagReportData |= FRD_DIRTY;
+		}
 		return;
 	}
 	
@@ -99,6 +98,7 @@ ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
 	}
 
 	++read_byte_cnt;
+	
 }
 
 void SetupHardware(void)
@@ -123,7 +123,7 @@ void SetupHardware(void)
 void EVENT_USB_Device_Connect(void)
 {
 	/* Indicate USB enumerating */
-	UART_printString("Connected\n\r");
+	UART_printString("Connected\r\n");
 }
 
 /** Event handler for the USB_Disconnect event. This indicates that the device is no longer connected to a host via
@@ -202,6 +202,8 @@ void ProcessGenericHIDReport(uint8_t* DataArray)
 
 bool GetNextReport(USB_GloveReport_Data_t* const ReportData)
 {
+	bool ret = false;
+	cli();
 	if(flagReportData & FRD_READY)
 	{
 		ReportData->accX = gGloveReportData.accX;
@@ -228,9 +230,10 @@ bool GetNextReport(USB_GloveReport_Data_t* const ReportData)
 		ReportData->flex_pinky	= gGloveReportData.flex_pinky;
 		
 		flagReportData &= ~(FRD_READY);
-		return true;
+		ret = true;
 	}
-	return false;
+	sei();
+	return ret;
 }
 
 void HID_Task(void)

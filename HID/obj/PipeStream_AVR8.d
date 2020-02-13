@@ -1,32 +1,32 @@
 obj/PipeStream_AVR8.o: \
  ../lufa/LUFA/Drivers/USB/Core/AVR8/PipeStream_AVR8.c \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\Architectures.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\BoardTypes.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\ArchitectureSpecific.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\CompilerSpecific.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\Attributes.h \
+ ../lufa/LUFA/Drivers/USB/Core/AVR8/../../../../Common/Common.h \
+ ../lufa/LUFA/Drivers/USB/Core/AVR8/../../../../Common/Architectures.h \
+ ../lufa/LUFA/Drivers/USB/Core/AVR8/../../../../Common/BoardTypes.h \
+ ../lufa/LUFA/Drivers/USB/Core/AVR8/../../../../Common/ArchitectureSpecific.h \
+ ../lufa/LUFA/Drivers/USB/Core/AVR8/../../../../Common/CompilerSpecific.h \
+ ../lufa/LUFA/Drivers/USB/Core/AVR8/../../../../Common/Attributes.h \
  Config/LUFAConfig.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\Endianness.h \
+ ../lufa/LUFA/Drivers/USB/Core/AVR8/../../../../Common/Endianness.h \
  ../lufa/LUFA/Drivers/USB/Core/AVR8/../USBMode.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h
+ ../lufa/LUFA/Drivers/USB/Core/AVR8/../../../../Common/Common.h
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h:
+../lufa/LUFA/Drivers/USB/Core/AVR8/../../../../Common/Common.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\Architectures.h:
+../lufa/LUFA/Drivers/USB/Core/AVR8/../../../../Common/Architectures.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\BoardTypes.h:
+../lufa/LUFA/Drivers/USB/Core/AVR8/../../../../Common/BoardTypes.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\ArchitectureSpecific.h:
+../lufa/LUFA/Drivers/USB/Core/AVR8/../../../../Common/ArchitectureSpecific.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\CompilerSpecific.h:
+../lufa/LUFA/Drivers/USB/Core/AVR8/../../../../Common/CompilerSpecific.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\Attributes.h:
+../lufa/LUFA/Drivers/USB/Core/AVR8/../../../../Common/Attributes.h:
 
 Config/LUFAConfig.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\Endianness.h:
+../lufa/LUFA/Drivers/USB/Core/AVR8/../../../../Common/Endianness.h:
 
 ../lufa/LUFA/Drivers/USB/Core/AVR8/../USBMode.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h:
+../lufa/LUFA/Drivers/USB/Core/AVR8/../../../../Common/Common.h:

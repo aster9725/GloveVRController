@@ -13,7 +13,6 @@ void UART_INIT(int baud)
 		
 	UBRR1H = 0x00;
 	UBRR1L = F_CPU / 8 / baud - 1;
-	//UBRR0L = 19;	// test for 100000 baud
 		
 	UCSR1C |= 0x06;
 		

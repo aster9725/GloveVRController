@@ -1,28 +1,28 @@
 obj/HostStandardReq.o: ../lufa/LUFA/Drivers/USB/Core/HostStandardReq.c \
  ../lufa/LUFA/Drivers/USB/Core/USBMode.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\Architectures.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\BoardTypes.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\ArchitectureSpecific.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\CompilerSpecific.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\Attributes.h \
+ ../lufa/LUFA/Drivers/USB/Core/../../../Common/Common.h \
+ ../lufa/LUFA/Drivers/USB/Core/../../../Common/Architectures.h \
+ ../lufa/LUFA/Drivers/USB/Core/../../../Common/BoardTypes.h \
+ ../lufa/LUFA/Drivers/USB/Core/../../../Common/ArchitectureSpecific.h \
+ ../lufa/LUFA/Drivers/USB/Core/../../../Common/CompilerSpecific.h \
+ ../lufa/LUFA/Drivers/USB/Core/../../../Common/Attributes.h \
  Config/LUFAConfig.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\Endianness.h
+ ../lufa/LUFA/Drivers/USB/Core/../../../Common/Endianness.h
 
 ../lufa/LUFA/Drivers/USB/Core/USBMode.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h:
+../lufa/LUFA/Drivers/USB/Core/../../../Common/Common.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\Architectures.h:
+../lufa/LUFA/Drivers/USB/Core/../../../Common/Architectures.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\BoardTypes.h:
+../lufa/LUFA/Drivers/USB/Core/../../../Common/BoardTypes.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\ArchitectureSpecific.h:
+../lufa/LUFA/Drivers/USB/Core/../../../Common/ArchitectureSpecific.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\CompilerSpecific.h:
+../lufa/LUFA/Drivers/USB/Core/../../../Common/CompilerSpecific.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\Attributes.h:
+../lufa/LUFA/Drivers/USB/Core/../../../Common/Attributes.h:
 
 Config/LUFAConfig.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\Endianness.h:
+../lufa/LUFA/Drivers/USB/Core/../../../Common/Endianness.h:

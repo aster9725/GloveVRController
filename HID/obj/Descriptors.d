@@ -1,28 +1,28 @@
 obj/Descriptors.o: Descriptors.c Descriptors.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/USB.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\Architectures.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\BoardTypes.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\ArchitectureSpecific.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\CompilerSpecific.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\Attributes.h \
+ ../lufa/LUFA/../LUFA/Drivers/USB/../../Common/Common.h \
+ ../lufa/LUFA/../LUFA/Drivers/USB/../../Common/Architectures.h \
+ ../lufa/LUFA/../LUFA/Drivers/USB/../../Common/BoardTypes.h \
+ ../lufa/LUFA/../LUFA/Drivers/USB/../../Common/ArchitectureSpecific.h \
+ ../lufa/LUFA/../LUFA/Drivers/USB/../../Common/CompilerSpecific.h \
+ ../lufa/LUFA/../LUFA/Drivers/USB/../../Common/Attributes.h \
  Config/LUFAConfig.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\Endianness.h \
+ ../lufa/LUFA/../LUFA/Drivers/USB/../../Common/Endianness.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Core/USBMode.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h \
+ ../lufa/LUFA/../LUFA/Drivers/USB/Core/../../../Common/Common.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Core/USBTask.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Core/USBMode.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Core/USBController.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/USBController_AVR8.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h \
+ ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../../../../Common/Common.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../USBMode.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../Events.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h \
+ ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../../../../Common/Common.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../USBMode.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../USBTask.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../USBInterrupt.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../AVR8/USBInterrupt_AVR8.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h \
+ ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../AVR8/../../../../Common/Common.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../AVR8/../USBMode.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../AVR8/../Events.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../AVR8/../USBController.h \
@@ -62,9 +62,9 @@ obj/Descriptors.o: Descriptors.c Descriptors.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Class/../Core/USBMode.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Class/AudioClass.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/AudioClassDevice.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\drivers\usb\usb.h \
+ ../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/../../USB.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/../Common/AudioClassCommon.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\drivers\usb\core\stddescriptors.h \
+ ../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/../Common/../../Core/StdDescriptors.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Class/CCIDClass.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/CCIDClassDevice.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/../Common/CCIDClassCommon.h \
@@ -75,7 +75,7 @@ obj/Descriptors.o: Descriptors.c Descriptors.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/HIDClassDevice.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/../Common/HIDClassCommon.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/../Common/HIDParser.h \
- d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h \
+ ../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/../Common/../../../../Common/Common.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/../Common/HIDReportData.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/../Common/HIDClassCommon.h \
  ../lufa/LUFA/../LUFA/Drivers/USB/Class/MassStorageClass.h \
@@ -99,25 +99,25 @@ Descriptors.h:
 
 ../lufa/LUFA/../LUFA/Drivers/USB/USB.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h:
+../lufa/LUFA/../LUFA/Drivers/USB/../../Common/Common.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\Architectures.h:
+../lufa/LUFA/../LUFA/Drivers/USB/../../Common/Architectures.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\BoardTypes.h:
+../lufa/LUFA/../LUFA/Drivers/USB/../../Common/BoardTypes.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\ArchitectureSpecific.h:
+../lufa/LUFA/../LUFA/Drivers/USB/../../Common/ArchitectureSpecific.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\CompilerSpecific.h:
+../lufa/LUFA/../LUFA/Drivers/USB/../../Common/CompilerSpecific.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\Attributes.h:
+../lufa/LUFA/../LUFA/Drivers/USB/../../Common/Attributes.h:
 
 Config/LUFAConfig.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\Endianness.h:
+../lufa/LUFA/../LUFA/Drivers/USB/../../Common/Endianness.h:
 
 ../lufa/LUFA/../LUFA/Drivers/USB/Core/USBMode.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h:
+../lufa/LUFA/../LUFA/Drivers/USB/Core/../../../Common/Common.h:
 
 ../lufa/LUFA/../LUFA/Drivers/USB/Core/USBTask.h:
 
@@ -127,13 +127,13 @@ d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h:
 
 ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/USBController_AVR8.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h:
+../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../../../../Common/Common.h:
 
 ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../USBMode.h:
 
 ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../Events.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h:
+../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../../../../Common/Common.h:
 
 ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../USBMode.h:
 
@@ -143,7 +143,7 @@ d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h:
 
 ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../AVR8/USBInterrupt_AVR8.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h:
+../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../AVR8/../../../../Common/Common.h:
 
 ../lufa/LUFA/../LUFA/Drivers/USB/Core/AVR8/../AVR8/../USBMode.h:
 
@@ -223,11 +223,11 @@ d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h:
 
 ../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/AudioClassDevice.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\drivers\usb\usb.h:
+../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/../../USB.h:
 
 ../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/../Common/AudioClassCommon.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\drivers\usb\core\stddescriptors.h:
+../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/../Common/../../Core/StdDescriptors.h:
 
 ../lufa/LUFA/../LUFA/Drivers/USB/Class/CCIDClass.h:
 
@@ -249,7 +249,7 @@ d:\ubuntu\glovevrcontroller\lufa\lufa\drivers\usb\core\stddescriptors.h:
 
 ../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/../Common/HIDParser.h:
 
-d:\ubuntu\glovevrcontroller\lufa\lufa\common\common.h:
+../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/../Common/../../../../Common/Common.h:
 
 ../lufa/LUFA/../LUFA/Drivers/USB/Class/Device/../Common/HIDReportData.h:
 
