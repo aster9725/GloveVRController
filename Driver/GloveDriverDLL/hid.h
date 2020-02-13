@@ -107,6 +107,13 @@ FindKnownHidDevice(
 );
 
 BOOLEAN
+FindKnownHidDevices(
+    OUT PHID_DEVICE* HidDevices, // A array of struct _HID_DEVICE
+    OUT PULONG        NumberDevices // the length of this array.
+);
+
+
+BOOLEAN
 FillDeviceInfo(
     IN  PHID_DEVICE HidDevice
 );

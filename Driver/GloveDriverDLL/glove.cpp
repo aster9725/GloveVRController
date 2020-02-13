@@ -14,6 +14,8 @@ extern "C" {
 }
 
 #define DEVICE_NAME "glove"
+#define DEVICE_VID  0x1993
+#define DEVICE_PID  0x0624
 
 static LIST               PhysicalDeviceList;
 
@@ -49,6 +51,7 @@ public:
         m_id = 0;
         m_pose = { 0 };
         m_skeleton = 0;
+        gloveHID = NULL;
     }
 
 
@@ -102,7 +105,7 @@ public:
         m_active = true;
         m_pose_thread = std::thread(&RightHandTest::UpdatePoseThread, this);
         
-        DriverLog("Dev] Glove Contorller Activated");
+        DriverLog("Dev] Glove Contorller Activate Start");
         
         return VRInitError_None;
     }
@@ -132,26 +135,6 @@ public:
     void UpdateControllerPose()
     {
         static int index = 0;
-        //if (!m_found_hmd)
-        //{
-        //    TrackedDevicePose_t hmd_pose;
-        //    VRServerDriverHost()->GetRawTrackedDevicePoses(0, &hmd_pose, 1);
-        //    if (hmd_pose.bPoseIsValid)
-        //    {
-        //        m_pose.vecPosition[0] = hmd_pose.mDeviceToAbsoluteTracking.m[0][3];
-        //        m_pose.vecPosition[1] = hmd_pose.mDeviceToAbsoluteTracking.m[1][3];
-        //        m_pose.vecPosition[2] = hmd_pose.mDeviceToAbsoluteTracking.m[2][3]+0.75;
-        //        m_found_hmd = true;
-        //    }
-        //}
-        static chrono::milliseconds _pose_timestamp = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch());
-        chrono::milliseconds time_since_epoch = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch());
-        double time_since_epoch_seconds = time_since_epoch.count() / 1000.0;
-        double pose_time_delta_seconds = (time_since_epoch - _pose_timestamp).count() / 1000.0;
-        //m_pose.vecPosition[0] = 0.1 * sin(pose_time_delta_seconds);
-        //m_pose.vecPosition[1] = 0.1 * sin(pose_time_delta_seconds);
-        //m_pose.vecPosition[2] = 0.1 * cos(pose_time_delta_seconds);
-
 
         VRServerDriverHost()->TrackedDevicePoseUpdated(m_id, m_pose, sizeof(DriverPose_t));
     }
@@ -167,14 +150,31 @@ public:
 
     void UpdatePoseThread()
     {
-
-        if (FindKnownHidDevice(gloveHID))
+        PHID_DEVICE hidList;
+        ULONG numDevices;
+        if (FindKnownHidDevices(&hidList, &numDevices) == TRUE)
         {
-            if(gloveHID)
-                DriverLog("Dev] Glove Contorller Founded VID: %d    PID: %d", gloveHID->Attributes.VendorID, gloveHID->Attributes.ProductID);
-            else
-                DriverLog("Dev] Glove Contorller Not Founded");
+            for (ULONG i = 0; i <= numDevices; i++)
+            {
+                if ((hidList + i)->Attributes.VendorID == DEVICE_VID && (hidList + i)->Attributes.ProductID == DEVICE_PID) 
+                {
+                    gloveHID = (PHID_DEVICE)malloc(sizeof(HID_DEVICE));
+                    if (gloveHID)
+                    {
+                        memcpy(gloveHID, (hidList + i), sizeof(HID_DEVICE));
+                        DriverLog("Dev] HID Device find VID.PID : %04x.%04x", gloveHID->Attributes.VendorID, gloveHID->Attributes.ProductID);
+                    }
+                    else
+                        DriverLog("Dev] HID Devices memalloc failed");
+                }
+            }
         }
+        else
+            DriverLog("Dev] HID Devices Not Found");
+
+        if (hidList)
+            free(hidList);
+
         while (m_active)
         {
             m_frame_count++;

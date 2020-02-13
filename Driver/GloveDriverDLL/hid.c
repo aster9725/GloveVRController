@@ -164,6 +164,208 @@ Done:
 }
 
 BOOLEAN
+FindKnownHidDevices(
+    OUT PHID_DEVICE* HidDevices, // A array of struct _HID_DEVICE
+    OUT PULONG        NumberDevices // the length of this array.
+)
+/*++
+Routine Description:
+   Do the required PnP things in order to find all the HID devices in
+   the system at this time.
+--*/
+{
+    HDEVINFO                            hardwareDeviceInfo = INVALID_HANDLE_VALUE;
+    SP_DEVICE_INTERFACE_DATA            deviceInfoData;
+    ULONG                               i;
+    BOOLEAN                             done = FALSE;
+    PHID_DEVICE                         hidDeviceInst;
+    GUID                                hidGuid;
+    PSP_DEVICE_INTERFACE_DETAIL_DATA    functionClassDeviceData = NULL;
+    ULONG                               predictedLength = 0;
+    ULONG                               requiredLength = 0;
+    PHID_DEVICE                         newHidDevices;
+
+
+    HidD_GetHidGuid(&hidGuid);
+
+    *HidDevices = NULL;
+    *NumberDevices = 0;
+
+    //
+    // Open a handle to the plug and play dev node.
+    //
+    hardwareDeviceInfo = SetupDiGetClassDevs(&hidGuid,
+        NULL, // Define no enumerator (global)
+        NULL, // Define no
+        (DIGCF_PRESENT | // Only Devices present
+            DIGCF_DEVICEINTERFACE)); // Function class devices.
+
+    if (INVALID_HANDLE_VALUE == hardwareDeviceInfo)
+    {
+        goto Done;
+    }
+
+    //
+    // Take a wild guess to start
+    //
+
+    *NumberDevices = 4;
+    done = FALSE;
+    deviceInfoData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
+
+    i = 0;
+    while (!done)
+    {
+        *NumberDevices *= 2;
+
+        if (*HidDevices)
+        {
+            newHidDevices =
+                realloc(*HidDevices, (*NumberDevices * sizeof(HID_DEVICE)));
+
+            if (NULL == newHidDevices)
+            {
+                free(*HidDevices);
+            }
+
+            *HidDevices = newHidDevices;
+        }
+        else
+        {
+            *HidDevices = calloc(*NumberDevices, sizeof(HID_DEVICE));
+        }
+
+        if (NULL == *HidDevices)
+        {
+            goto Done;
+        }
+
+        hidDeviceInst = *HidDevices + i;
+
+        for (; i < *NumberDevices; i++, hidDeviceInst++)
+        {
+            //
+            // Initialize an empty HID_DEVICE
+            //
+            RtlZeroMemory(hidDeviceInst, sizeof(HID_DEVICE));
+
+            hidDeviceInst->HidDevice = INVALID_HANDLE_VALUE;
+
+            if (SetupDiEnumDeviceInterfaces(hardwareDeviceInfo,
+                0, // No care about specific PDOs
+                &hidGuid,
+                i,
+                &deviceInfoData))
+            {
+                //
+                // allocate a function class device data structure to receive the
+                // goods about this particular device.
+                //
+
+                SetupDiGetDeviceInterfaceDetail(
+                    hardwareDeviceInfo,
+                    &deviceInfoData,
+                    NULL, // probing so no output buffer yet
+                    0, // probing so output buffer length of zero
+                    &requiredLength,
+                    NULL); // not interested in the specific dev-node
+
+
+                predictedLength = requiredLength;
+
+                functionClassDeviceData = malloc(predictedLength);
+                if (functionClassDeviceData)
+                {
+                    functionClassDeviceData->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
+                    ZeroMemory(functionClassDeviceData->DevicePath, sizeof(functionClassDeviceData->DevicePath));
+                }
+                else
+                {
+                    goto Done;
+                }
+
+                //
+                // Retrieve the information from Plug and Play.
+                //
+
+                if (SetupDiGetDeviceInterfaceDetail(
+                    hardwareDeviceInfo,
+                    &deviceInfoData,
+                    functionClassDeviceData,
+                    predictedLength,
+                    &requiredLength,
+                    NULL))
+                {
+                    //
+                    // Open device with just generic query abilities to begin with
+                    //
+
+                    if (!OpenHidDevice(functionClassDeviceData->DevicePath,
+                        FALSE,      // ReadAccess - none
+                        FALSE,      // WriteAccess - none
+                        FALSE,       // Overlapped - no
+                        FALSE,       // Exclusive - no
+                        hidDeviceInst))
+                    {
+                        //
+                        // Save the device path so it can be still listed.
+                        //
+                        INT     iDevicePathSize;
+
+                        iDevicePathSize = (INT)strlen(functionClassDeviceData->DevicePath) + 1;
+
+                        hidDeviceInst->DevicePath = malloc(iDevicePathSize);
+
+                        if (NULL != hidDeviceInst->DevicePath)
+                        {
+                            StringCbCopy(hidDeviceInst->DevicePath, iDevicePathSize, functionClassDeviceData->DevicePath);
+                        }
+                    }
+                }
+
+                free(functionClassDeviceData);
+                functionClassDeviceData = NULL;
+
+                if (hidDeviceInst->Attributes.VendorID == 0x1993 && hidDeviceInst->Attributes.ProductID == 0x0624)
+                {
+                    done = TRUE;
+                    break;
+                }
+            }
+            else
+            {
+                if (ERROR_NO_MORE_ITEMS == GetLastError())
+                {
+                    done = TRUE;
+                    break;
+                }
+            }
+        }
+    }
+
+    *NumberDevices = i;
+
+Done:
+    if (FALSE == done)
+    {
+        if (NULL != *HidDevices)
+        {
+            free(*HidDevices);
+            *HidDevices = NULL;
+        }
+    }
+
+    if (INVALID_HANDLE_VALUE != hardwareDeviceInfo)
+    {
+        SetupDiDestroyDeviceInfoList(hardwareDeviceInfo);
+        hardwareDeviceInfo = INVALID_HANDLE_VALUE;
+    }
+
+    return done;
+}
+
+
+BOOLEAN
 FindKnownHidDevice(
     OUT PHID_DEVICE HidDevice // A array of struct _HID_DEVICE
 )
@@ -186,8 +388,6 @@ Routine Description:
 
 
     HidD_GetHidGuid(&hidGuid);
-
-    
 
     HidDevice = NULL;
 
@@ -231,7 +431,7 @@ Routine Description:
             // Initialize an empty HID_DEVICE
             //
             RtlZeroMemory(hidDeviceInst, sizeof(HID_DEVICE));
-            
+
             hidDeviceInst->HidDevice = INVALID_HANDLE_VALUE;
 
             if (SetupDiEnumDeviceInterfaces(hardwareDeviceInfo,
@@ -309,9 +509,10 @@ Routine Description:
                 free(functionClassDeviceData);
                 functionClassDeviceData = NULL;
 
-                if (hidDeviceInst->Attributes.VendorID == 0x1991 && hidDeviceInst->Attributes.ProductID == 0x1129)
+                if (hidDeviceInst->Attributes.VendorID == 0x1993 && hidDeviceInst->Attributes.ProductID == 0x0624)
                 {
                     done = TRUE;
+                    //HidDevice = hidDeviceInst;
                     break;
                 }
             }
@@ -319,6 +520,7 @@ Routine Description:
             {
                 if (ERROR_NO_MORE_ITEMS == GetLastError())
                 {
+                    done = TRUE;
                     break;
                 }
             }
