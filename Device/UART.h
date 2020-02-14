@@ -1,18 +1,20 @@
 ﻿/*
  * UART.h
  *
- * Created: 2020-02-07 오후 12:00:22
+ * Created: 2020-01-08 오후 12:37:08
  *  Author: bitcamp
  */ 
+#ifndef _UART_H_
+#define _UART_H_
 
-#define F_CPU 16000000UL
+#include <avr/io.h>
 
-#include<avr/io.h>
-#include<avr/interrupt.h>
-#include<util/delay.h>
-#include<math.h>
-#include <stdio.h>
+void UART_INIT(void);
+unsigned char UART_receive(void);
+void UART_transmit(unsigned char data);
+void UART_printString(char* str);
+void UART_print8bitNumber(uint8_t no);
+void UART_print16bitNumber(uint16_t no);
+void UART_print32bitNumber(uint32_t no);
 
-void USART_Transmit(unsigned char tx_data);
-void UART_printString(char *str);
-void USART_Transmit_init4(int data);
+#endif
