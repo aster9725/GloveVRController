@@ -27,6 +27,12 @@
     <ClCompile Include="hid.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="InputConverter.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MadgwickAHRS.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bones.h">
@@ -36,6 +42,15 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="hid.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="glovedatatype.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="InputConverter.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MadgwickAHRS.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

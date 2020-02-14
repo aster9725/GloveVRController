@@ -1,6 +1,7 @@
 #include "openvr_driver.h"
 #include "bones.h"
 #include "driverlog.h"
+#include "InputConverter.h"
 #include <thread>
 #include <atomic>
 #include <chrono>
@@ -11,6 +12,7 @@ using namespace std;
 
 extern "C" {
 #include "hid.h"
+#include "MadgwickAHRS.h"
 }
 
 #define DEVICE_NAME "glove"
@@ -19,7 +21,7 @@ extern "C" {
 
 static LIST               PhysicalDeviceList;
 
-static const char* device_manufacturer = "sean";
+static const char* device_manufacturer = "sysglove";
 static const char *device_controller_type = DEVICE_NAME;
 static const char* device_model_number = DEVICE_NAME "1";
 static const char* device_serial_number = DEVICE_NAME "SN0";
@@ -196,6 +198,8 @@ public:
             ULONG   numReadsDone;
             OVERLAPPED overlap;
             DWORD      bytesTransferred;
+            InputConverter IC;
+            USB_REPORT_DATA_T tmpRawData;
 
             completionEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
@@ -232,16 +236,33 @@ public:
                             CHAR        szTempBuff[1024] = { 0 };
                             PHID_DATA   pData = asyncDevice.InputData;
                             UINT        uLoop;
-
+                            PINT16      p16 = &(tmpRawData.acc.x);
+                            PINT8       p8 = &(tmpRawData.flex.index);
                             for (uLoop = 0; uLoop < asyncDevice.InputDataLength; uLoop++)
                             {
                                 ReportToString(pData, szTempBuff, sizeof(szTempBuff));
-
                                 DriverLog("Dev] %s", szTempBuff);
+                                if (uLoop < 9)
+                                    *p16 = (INT16)(pData->ValueData.Value);
+                                else
+                                    *p8 = (INT8)(pData->ValueData.Value);
 
                                 pData++;
                             }
+                            DriverLog("Dev] RAWACC_X : %d", tmpRawData.acc.x);
+                            DriverLog("Dev] RAWACC_Y : %d", tmpRawData.acc.y);
+                            DriverLog("Dev] RAWACC_Z : %d", tmpRawData.acc.y);
 
+                            DriverLog("Dev] RAWGYRO_X : %d", tmpRawData.gyro.x);
+                            DriverLog("Dev] RAWGYRO_Y : %d", tmpRawData.gyro.y);
+                            DriverLog("Dev] RAWGYRO_Z : %d", tmpRawData.gyro.y);
+
+                            DriverLog("Dev] RAWMAG_X : %d", tmpRawData.mag.x);
+                            DriverLog("Dev] RAWMAG_Y : %d", tmpRawData.mag.y);
+                            DriverLog("Dev] RAWMAG_Z : %d", tmpRawData.mag.y);
+
+
+                            MadgwickAHRSupdate(IC.GetPoseData());
                             m_frame_count++;
                             UpdateControllerPose();
                             UpdateHandSkeletonPoses();
@@ -252,9 +273,7 @@ public:
                     else
                     {
                         DriverLog("Dev] Read Device File Failed");
-                        //goto ASYNCREAD_END;
                     }
-                    //this_thread::sleep_for(chrono::milliseconds(500));
                 }
             }
             else
