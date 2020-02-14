@@ -4,7 +4,6 @@
 #define F_CPU 16000000UL
 
 #define FS_SEL 131
-#define test 
 #include<avr/io.h> 
 #include<avr/interrupt.h>
 #include<util/delay.h>
