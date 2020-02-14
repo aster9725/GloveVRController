@@ -14,6 +14,7 @@
 #include<avr/interrupt.h>
 #include<util/delay.h>
 #include<math.h>
+#include "twi.h"
 
 volatile float ASAX,ASAY,ASAZ;
 

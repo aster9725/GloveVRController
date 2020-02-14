@@ -13,6 +13,7 @@
 #include "MadgwickAHRS.h"
 #include "UART.h"
 #include "twi.h"
+//#include "interrupt.h"
  
 void twi_write(unsigned char address,unsigned char data);
 unsigned char twi_read(char addressr);
@@ -24,7 +25,6 @@ void MPU9250_init();
 void UART_printString(char *str);
 
 
-volatile double dt = 0.000;
 volatile int temp;
 volatile unsigned char a_x_l,a_x_h,a_y_l,a_y_h,a_z_l,a_z_h;
 volatile unsigned char g_x_l,g_x_h,g_y_l,g_y_h,g_z_l,g_z_h;
@@ -37,7 +37,7 @@ volatile float ASAX,ASAY,ASAZ;
 
 #define I2C_SCL PC5
 #define I2C_SDA PC4
-
+//S12 12 12 12 12 12121212123456789E
 int main()
 {  
 
@@ -106,7 +106,21 @@ int main()
 		USART_Transmit(m_y_l);
 		USART_Transmit(m_z_h);
 		USART_Transmit(m_z_l);
+		
+		USART_Transmit(m_y_h);
+		USART_Transmit(m_y_l);
+		USART_Transmit(m_z_h);
+		USART_Transmit(m_z_l);
+		
+		USART_Transmit(m_x_h);
+		USART_Transmit(m_x_l);
+		USART_Transmit(m_y_h);
+		USART_Transmit(m_y_l);
+		USART_Transmit(m_z_h);
+		
 		USART_Transmit('E');
+		
+		_delay_ms(500);
 	} 
 
 } 
