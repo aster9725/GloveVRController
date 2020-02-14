@@ -13,6 +13,7 @@
 #include<math.h>
 #include <stdio.h>
 
+void UART_INIT(void);
 void USART_Transmit(unsigned char tx_data);
 void UART_printString(char *str);
 void USART_Transmit_init4(int data);

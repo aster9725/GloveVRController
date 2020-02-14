@@ -131,3 +131,30 @@ unsigned char twi_read(char address)
 
 	return data; 
 }
+
+
+void get_raw_data()
+{
+	a_x_h = twi_read(0x3B);		//x축 가속도
+	a_x_l = twi_read(0x3C);
+	a_y_h = twi_read(0x3D);		//y축 가속도
+	a_y_l = twi_read(0x3E);
+	a_z_h = twi_read(0x3F);		//z축 가속도
+	a_z_l = twi_read(0x40);
+	
+	g_x_h = twi_read(0x43);		//x축 각속도
+	g_x_l = twi_read(0x44);
+	g_y_h = twi_read(0x45);		//y축 각속도
+	g_y_l = twi_read(0x46);
+	g_z_h = twi_read(0x47);		//z축 각속도
+	g_z_l = twi_read(0x48);
+
+	m_x_h = twi_read(0x49);		//x축 콤파스
+	m_x_l = twi_read(0x4A);
+	m_y_h = twi_read(0x4B);		//y축 콤파스
+	m_y_l = twi_read(0x4C);
+	m_z_h = twi_read(0x4D);		//z축 콤파스
+	m_z_l = twi_read(0x4E);
+
+}
+
