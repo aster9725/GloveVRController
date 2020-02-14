@@ -64,6 +64,7 @@ ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
 		flagReportData &= ~(FRD_DIRTY);
 		flagReportData &= ~(FRD_READY);
 		pXYZ = (uint16_t*)&(gGloveReportData.accX);
+		pEF = (uint8_t*)&(gGloveReportData.enc_index);
 		read_byte_cnt = 0;
 		return;
 	}
@@ -98,7 +99,7 @@ ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
 	}
 
 	++read_byte_cnt;
-	
+
 }
 
 void SetupHardware(void)
