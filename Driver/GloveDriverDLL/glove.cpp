@@ -14,8 +14,8 @@ extern "C" {
 }
 
 #define DEVICE_NAME "glove"
-#define DEVICE_VID  0x1993
-#define DEVICE_PID  0x0624
+#define DEVICE_VID  0x1991
+#define DEVICE_PID  0x1129
 
 static LIST               PhysicalDeviceList;
 
@@ -42,6 +42,7 @@ public:
     atomic<bool> m_active;
     thread m_pose_thread, m_hid_thread;
     PHID_DEVICE gloveHID;
+    HID_DEVICE asyncDevice;
 
     RightHandTest()
         :   m_frame_count(0),
@@ -85,13 +86,13 @@ public:
         PropertyContainerHandle_t props = VRProperties()->TrackedDeviceToPropertyContainer(m_id);
         VRProperties()->SetStringProperty(props, Prop_SerialNumber_String, device_serial_number);
         VRProperties()->SetStringProperty(props, Prop_ModelNumber_String, device_model_number);
-        VRProperties()->SetStringProperty(props, Prop_RenderModelName_String, device_render_model_name);
+        //VRProperties()->SetStringProperty(props, Prop_RenderModelName_String, device_render_model_name);
         VRProperties()->SetStringProperty(props, Prop_RenderModelName_String, "vr_controller_vive_1_5");
         VRProperties()->SetStringProperty(props, Prop_ManufacturerName_String, device_manufacturer);
-        VRProperties()->SetInt32Property(props, Prop_ControllerRoleHint_Int32, TrackedControllerRole_RightHand);
-        VRProperties()->SetInt32Property(props, Prop_DeviceClass_Int32, (int32_t)TrackedDeviceClass_Controller);
         VRProperties()->SetStringProperty(props, Prop_InputProfilePath_String, device_input_profile_path);
         VRProperties()->SetStringProperty(props, Prop_ControllerType_String, device_controller_type);
+        VRProperties()->SetInt32Property(props, Prop_ControllerRoleHint_Int32, TrackedControllerRole_RightHand);
+        VRProperties()->SetInt32Property(props, Prop_DeviceClass_Int32, (int32_t)TrackedDeviceClass_Controller);
         //VRProperties()->SetStringProperty(props, Prop_LegacyInputProfile_String, device_controller_type);
 
         EVRInputError error = VRDriverInput()->CreateSkeletonComponent(props,
@@ -118,6 +119,8 @@ public:
             m_pose_thread.join();
             DriverLog("Dev] Glove Contorller Deactivated");
         }
+        CloseHidDevice(&asyncDevice);
+        free(gloveHID);
     }
 
     void EnterStandby() override {}
@@ -152,7 +155,6 @@ public:
     {
         PHID_DEVICE hidList = NULL;
         ULONG numDevices;
-        static HID_DEVICE asyncDevice;
         BOOLEAN readAsync;
 
         if (FindKnownHidDevices(&hidList, &numDevices) == TRUE)
@@ -168,7 +170,7 @@ public:
                         DriverLog("Dev] HID Device find VID.PID : %04x.%04x", gloveHID->Attributes.VendorID, gloveHID->Attributes.ProductID);
                     }
                     else
-                        DriverLog("Dev] HID Devices memalloc failed");
+                        DriverLog("Dev] HID Device List memory allocation failed");
                 }
             }
         }
@@ -205,29 +207,60 @@ public:
                 
                 while (m_active)
                 {
-                    readResult = ReadOverlapped(gloveHID, completionEvent, &overlap);
+                    readResult = ReadOverlapped(&asyncDevice, completionEvent, &overlap);
                     if (readResult)
                     {
                         DriverLog("Dev] Read Device File Success");
+                        waitStatus = WaitForSingleObject(completionEvent, 1000);
+                        if (WAIT_OBJECT_0 == waitStatus)
+                        {
+                            DriverLog("Dev] Driver successfully got single USB data object");
+                            readResult = GetOverlappedResult(asyncDevice.HidDevice, &overlap, &bytesTransferred, TRUE);
+
+                            if (!m_active)
+                                break;
+
+                            numReadsDone++;
+
+                            UnpackReport(asyncDevice.InputReportBuffer,
+                                asyncDevice.Caps.InputReportByteLength,
+                                HidP_Input,
+                                asyncDevice.InputData,
+                                asyncDevice.InputDataLength,
+                                asyncDevice.Ppd);
+
+                            CHAR        szTempBuff[1024] = { 0 };
+                            PHID_DATA   pData = asyncDevice.InputData;
+                            UINT        uLoop;
+
+                            for (uLoop = 0; uLoop < asyncDevice.InputDataLength; uLoop++)
+                            {
+                                ReportToString(pData, szTempBuff, sizeof(szTempBuff));
+
+                                DriverLog("Dev] %s", szTempBuff);
+
+                                pData++;
+                            }
+
+                            m_frame_count++;
+                            UpdateControllerPose();
+                            UpdateHandSkeletonPoses();
+                        }
+                        else
+                            DriverLog("Dev] Driver fail to get single USB data object");
                     }
                     else
                     {
                         DriverLog("Dev] Read Device File Failed");
-                        goto ASYNCREAD_END;
+                        //goto ASYNCREAD_END;
                     }
-                    m_frame_count++;
-                    UpdateControllerPose();
-                    UpdateHandSkeletonPoses();
-
-                    this_thread::sleep_for(chrono::milliseconds(10));
+                    //this_thread::sleep_for(chrono::milliseconds(500));
                 }
             }
             else
             {
                 DriverLog("Dev] Create CompletionEvent Failed");
             }
-        ASYNCREAD_END:
-            CloseHidDevice(&asyncDevice);
         }
     }
 };

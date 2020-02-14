@@ -1717,3 +1717,74 @@ Routine Description:
 Done:
     return result;
 }
+
+VOID
+ReportToString(
+    PHID_DATA pData,
+    _Inout_updates_bytes_(iBuffSize) LPSTR szBuff,
+    UINT      iBuffSize
+)
+{
+    PCHAR   pszWalk;
+    PUSAGE  pUsage;
+    ULONG   i;
+    UINT    iRemainingBuffer;
+    UINT    iStringLength;
+    UINT     j;
+
+    //
+    // For button data, all the usages in the usage list are to be displayed
+    //
+
+    if (pData->IsButtonData)
+    {
+        if (FAILED(StringCbPrintf(szBuff,
+            iBuffSize,
+            "Usage Page: 0x%x, Usages: ",
+            pData->UsagePage)))
+        {
+            for (j = 0; j < iBuffSize; j++)
+            {
+                szBuff[j] = '\0';
+            }
+            return;  // error case
+        }
+
+        iRemainingBuffer = 0;
+        iStringLength = (UINT)strlen(szBuff);
+        pszWalk = szBuff + iStringLength;
+        if (iStringLength < iBuffSize)
+        {
+            iRemainingBuffer = iBuffSize - iStringLength;
+        }
+
+        for (i = 0, pUsage = pData->ButtonData.Usages;
+            i < pData->ButtonData.MaxUsageLength;
+            i++, pUsage++)
+        {
+            if (0 == *pUsage)
+            {
+                break; // A usage of zero is a non button.
+            }
+            if (FAILED(StringCbPrintf(pszWalk, iRemainingBuffer, " 0x%x", *pUsage)))
+            {
+                return; // error case
+            }
+            iRemainingBuffer -= (UINT)strlen(pszWalk);
+            pszWalk += strlen(pszWalk);
+        }
+    }
+    else
+    {
+        if (FAILED(StringCbPrintf(szBuff,
+            iBuffSize,
+            "Usage Page: 0x%x, Usage: 0x%x, Scaled: %d Value: %d",
+            pData->UsagePage,
+            pData->ValueData.Usage,
+            pData->ValueData.ScaledValue,
+            pData->ValueData.Value)))
+        {
+            return; // error case
+        }
+    }
+}

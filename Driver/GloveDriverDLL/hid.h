@@ -170,3 +170,10 @@ BOOLEAN
 GetFeature(
     PHID_DEVICE    HidDevice
 );
+
+VOID
+ReportToString(
+    PHID_DATA    pData,
+    _Inout_updates_bytes_(iBuffSize) LPSTR szBuff,
+    UINT          iBuffSize
+);
