@@ -1,5 +1,6 @@
 .vs/
 Debug/
-Device.atsln
-Device.componentinfo.xml
-Device.cproj
+*.atsln
+*.componentinfo.xml
+*.cproj
+*.cppproj
