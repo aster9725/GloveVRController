@@ -24,14 +24,14 @@
 //----------------------------------------------------------------------------------------------------
 // Variable declaration
 
-extern volatile double beta;				// algorithm gain
-extern volatile double q0, q1, q2, q3;	// quaternion of sensor frame relative to auxiliary frame
+extern volatile float beta;				// algorithm gain
+extern volatile float q0, q1, q2, q3;	// quaternion of sensor frame relative to auxiliary frame
 
 //---------------------------------------------------------------------------------------------------
 // Function declarations
 
 void MadgwickAHRSupdate(PGLOVE_POSE_DATA_T resultData);
-void MadgwickAHRSupdateIMU(double gx, double gy, double gz, double ax, double ay, double az);
+void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az);
 
 #endif
 //=====================================================================================================

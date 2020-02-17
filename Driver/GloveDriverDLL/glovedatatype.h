@@ -21,8 +21,8 @@ typedef struct {
 	RAWGYRO	gyro;
 	RAWMAG	mag;
 	ASA		asa;
-	FLEX	flex;
 	ENCODER	enc;
+	FLEX	flex;
 }USB_REPORT_DATA_T, * PUSB_REPORT_DATA_T;
 
 typedef struct {
@@ -33,9 +33,9 @@ typedef struct {
 }QUATANION;
 
 typedef struct {
-	double x;
-	double y;
-	double z;
+	float x;
+	float y;
+	float z;
 }ACC, GYRO, MAG;
 
 typedef struct {

@@ -27,18 +27,18 @@
 //---------------------------------------------------------------------------------------------------
 // Definitions
 
-#define sampleFreq	512.0f		// sample frequency in Hz
+#define sampleFreq	500.0f		// sample frequency in Hz
 #define betaDef		0.1f		// 2 * proportional gain
 
 //---------------------------------------------------------------------------------------------------
 // Variable definitions
 
-volatile double beta = betaDef;								// 2 * proportional gain (Kp)
-volatile double q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;	// quaternion of sensor frame relative to auxiliary frame
+volatile float beta = betaDef;								// 2 * proportional gain (Kp)
+volatile float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;	// quaternion of sensor frame relative to auxiliary frame
 //---------------------------------------------------------------------------------------------------
 // Function declarations
 
-double invSqrt(double x);
+float invSqrt(float x);
 
 //====================================================================================================
 // Functions
@@ -46,22 +46,24 @@ double invSqrt(double x);
 //---------------------------------------------------------------------------------------------------
 // AHRS algorithm update
 
-void MadgwickAHRSupdate(PGLOVE_POSE_DATA_T resultData) 
+void MadgwickAHRSupdate(PGLOVE_POSE_DATA_T poseData) 
 {
-	double recipNorm;
-	double s0, s1, s2, s3;
-	double qDot1, qDot2, qDot3, qDot4;
-	double hx, hy;
-	double _2q0mx, _2q0my, _2q0mz, _2q1mx, _2bx, _2bz, _4bx, _4bz, _2q0, _2q1, _2q2, _2q3, _2q0q2, _2q2q3, q0q0, q0q1, q0q2, q0q3, q1q1, q1q2, q1q3, q2q2, q2q3, q3q3;
-	double gx = resultData->gyro.x;
-	double gy = resultData->gyro.y;
-	double gz = resultData->gyro.z;
-	double ax = resultData->acc.x;
-	double ay = resultData->acc.y;
-	double az = resultData->acc.z;
-	double mx = resultData->mag.x;
-	double my = resultData->mag.y;
-	double mz = resultData->mag.z;
+	static float recipNorm;
+	static float s0, s1, s2, s3;
+	static float qDot1, qDot2, qDot3, qDot4;
+	static float hx, hy;
+	static float _2q0mx, _2q0my, _2q0mz, _2q1mx, _2bx, _2bz, _4bx, _4bz, _2q0, _2q1, _2q2, _2q3, _2q0q2, _2q2q3, q0q0, q0q1, q0q2, q0q3, q1q1, q1q2, q1q3, q2q2, q2q3, q3q3;
+
+	float gx = poseData->gyro.x;
+	float gy = poseData->gyro.y;
+	float gz = poseData->gyro.z;
+	float ax = poseData->acc.x;
+	float ay = poseData->acc.y;
+	float az = poseData->acc.z;
+	float mx = poseData->mag.x;
+	float my = poseData->mag.y;
+	float mz = poseData->mag.z;
+
 	// Use IMU algorithm if magnetometer measurement invalid (avoids NaN in magnetometer normalisation)
 	if((mx == 0.0f) && (my == 0.0f) && (mz == 0.0f)) {
 		MadgwickAHRSupdateIMU(gx, gy, gz, ax, ay, az);
@@ -114,7 +116,7 @@ void MadgwickAHRSupdate(PGLOVE_POSE_DATA_T resultData)
 		// Reference direction of Earth's magnetic field
 		hx = mx * q0q0 - _2q0my * q3 + _2q0mz * q2 + mx * q1q1 + _2q1 * my * q2 + _2q1 * mz * q3 - mx * q2q2 - mx * q3q3;
 		hy = _2q0mx * q3 + my * q0q0 - _2q0mz * q1 + _2q1mx * q2 - my * q1q1 + my * q2q2 + _2q2 * mz * q3 - my * q3q3;
-		_2bx = sqrt(hx * hx + hy * hy);
+		_2bx = sqrtf(hx * hx + hy * hy);
 		_2bz = -_2q0mx * q2 + _2q0my * q1 + mz * q0q0 + _2q1mx * q3 - mz * q1q1 + _2q2 * my * q3 - mz * q2q2 + mz * q3q3;
 		_4bx = 2.0f * _2bx;
 		_4bz = 2.0f * _2bz;
@@ -151,20 +153,20 @@ void MadgwickAHRSupdate(PGLOVE_POSE_DATA_T resultData)
 	q3 *= recipNorm;
 	
 	
-	resultData->qPos.w = q0;
-	resultData->qPos.x = q1;
-	resultData->qPos.y = q2;
-	resultData->qPos.z = q3;	
+	poseData->qPos.w = (double)q0;
+	poseData->qPos.x = (double)q1;
+	poseData->qPos.y = (double)q2;
+	poseData->qPos.z = (double)q3;	
 }
 
 //---------------------------------------------------------------------------------------------------
 // IMU algorithm update
 
-void MadgwickAHRSupdateIMU(double gx, double gy, double gz, double ax, double ay, double az) {
-	double recipNorm;
-	double s0, s1, s2, s3;
-	double qDot1, qDot2, qDot3, qDot4;
-	double _2q0, _2q1, _2q2, _2q3, _4q0, _4q1, _4q2 ,_8q1, _8q2, q0q0, q1q1, q2q2, q3q3;
+void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az) {
+	float recipNorm;
+	float s0, s1, s2, s3;
+	float qDot1, qDot2, qDot3, qDot4;
+	float _2q0, _2q1, _2q2, _2q3, _4q0, _4q1, _4q2 ,_8q1, _8q2, q0q0, q1q1, q2q2, q3q3;
 
 	// Rate of change of quaternion from gyroscope
 	qDot1 = 0.5f * (-q1 * gx - q2 * gy - q3 * gz);
@@ -232,12 +234,12 @@ void MadgwickAHRSupdateIMU(double gx, double gy, double gz, double ax, double ay
 // Fast inverse square-root
 // See: http://en.wikipedia.org/wiki/Fast_inverse_square_root
 
-double invSqrt(double x) {
-	double halfx = 0.5f * x;
-	double y = x;
+float invSqrt(float x) {
+	float halfx = 0.5f * x;
+	float y = x;
 	long i = *(long*)&y;
 	i = 0x5f3759df - (i>>1);
-	y = *(double*)&i;
+	y = *(float*)&i;
 	y = y * (1.5f - (halfx * y * y));
 	return y;
 }
