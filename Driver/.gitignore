@@ -1,3 +1,5 @@
 .vs/
 GloveDriverDLL/GloveDriverDLL.tlog
 GloveDriverDLL/GloveDriverDLL.log
+GloveDriverDll/*.obj
+GloveDriverDll/*.pdb
