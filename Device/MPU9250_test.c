@@ -95,13 +95,13 @@ int main()
 		
 		USART_Transmit(m_x_h);
 		USART_Transmit(m_x_l);
-		USART_Transmit(m_y_h);
-		USART_Transmit(m_y_l);
-		USART_Transmit(m_z_h);
+		USART_Transmit(ASAX);
+		USART_Transmit(ASAY);
+		USART_Transmit(ASAZ);
 		
 		USART_Transmit('E');
 		
-		_delay_ms(500);
+		_delay_ms(2);
 	} 
 
 } 

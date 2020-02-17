@@ -47,13 +47,13 @@ void MPU9250_init()
     twi_write(0x2C, 0x12); //[I2C_SLV2_REG]
     twi_write(0x2D, 0x81); //[I2C_SLV2_CTRL]
 
-	_delay_ms(100);
+	/*_delay_ms(100);
 
 	ASAX = twi_read(0x49);
 	ASAY = twi_read(0x4A);
 	ASAZ = twi_read(0x4B);
 
-	_delay_ms(100);
+	_delay_ms(100);*/
 
 
 	twi_write(0x25, 0x8C); //[I2C_SLV0_ADDR] AK8963 read.
