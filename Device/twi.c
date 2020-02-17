@@ -4,6 +4,7 @@
  * Created: 2020-02-11 오전 11:40:08
  *  Author: bitcamp
  */ 
+
 #include "twi.h"
 
 
@@ -28,9 +29,9 @@ void MPU9250_init()
 	twi_write(0x67, 0x0F); //[I2C_MST_DELAY_CTRL]
 
 	twi_write(0x2E, 0x0C); //[I2C_SLV3_ADDR] AK8963 write
-    twi_write(0x2F, 0x0A); //[I2C_SLV3_REG]
-    twi_write(0x30, 0x81); //[I2C_SLV3_CTRL]
-    twi_write(0x66, 0x11); //[I2C_SLV3_DO]
+    twi_write(0x2F, 0x0A); //[I2C_SLV3_REG]		내부 레지스터 주소
+    twi_write(0x30, 0x81); //[I2C_SLV3_CTRL]	인터럽트 신호 발생 완료되면 비활성화 레지스터 54에서 확인가능	& 속도 감소 수식 : 1 / (1 + I2C_MST_DLY(17)) samples 
+    twi_write(0x66, 0x11); //[I2C_SLV3_DO]		슬레이브장치에 기록	DI는 읽기
 
     twi_write(0x34, 0x13); //[I2C_SLV4_CTRL] 모든 slave 19+1번 샘플
 	
@@ -130,3 +131,30 @@ unsigned char twi_read(char address)
 
 	return data; 
 }
+
+
+void get_raw_data()
+{
+	a_x_h = twi_read(0x3B);		//x축 가속도
+	a_x_l = twi_read(0x3C);
+	a_y_h = twi_read(0x3D);		//y축 가속도
+	a_y_l = twi_read(0x3E);
+	a_z_h = twi_read(0x3F);		//z축 가속도
+	a_z_l = twi_read(0x40);
+	
+	g_x_h = twi_read(0x43);		//x축 각속도
+	g_x_l = twi_read(0x44);
+	g_y_h = twi_read(0x45);		//y축 각속도
+	g_y_l = twi_read(0x46);
+	g_z_h = twi_read(0x47);		//z축 각속도
+	g_z_l = twi_read(0x48);
+
+	m_x_h = twi_read(0x49);		//x축 콤파스
+	m_x_l = twi_read(0x4A);
+	m_y_h = twi_read(0x4B);		//y축 콤파스
+	m_y_l = twi_read(0x4C);
+	m_z_h = twi_read(0x4D);		//z축 콤파스
+	m_z_l = twi_read(0x4E);
+
+}
+

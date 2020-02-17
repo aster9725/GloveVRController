@@ -6,6 +6,20 @@
  */ 
 #include "UART.h"
 
+void UART_INIT(void)
+{
+	UCSR0A |= _BV(U2X0);
+	
+	UBRR0H = 0x00;
+	UBRR0L = 207;
+	
+	UCSR0C |= 0x06;
+	
+	UCSR0B |= _BV(RXEN0);
+	UCSR0B |= _BV(TXEN0);
+	
+}
+
 void USART_Transmit(unsigned char tx_data)
 {
 	while( !(UCSR0A & (1 <<UDRE0)));
