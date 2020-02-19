@@ -34,11 +34,11 @@
 // Variable definitions
 
 volatile float beta = betaDef;								// 2 * proportional gain (Kp)
-volatile float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;	// quaternion of sensor frame relative to auxiliary frame
+volatile static float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;	// quaternion of sensor frame relative to auxiliary frame
 //---------------------------------------------------------------------------------------------------
 // Function declarations
 
-float invSqrt(float x);
+static float invSqrt(float x);
 
 //====================================================================================================
 // Functions
@@ -152,7 +152,6 @@ void MadgwickAHRSupdate(PGLOVE_POSE_DATA_T poseData)
 	q2 *= recipNorm;
 	q3 *= recipNorm;
 	
-	
 	poseData->qPos.w = (double)q0;
 	poseData->qPos.x = (double)q1;
 	poseData->qPos.y = (double)q2;
@@ -234,7 +233,7 @@ void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, flo
 // Fast inverse square-root
 // See: http://en.wikipedia.org/wiki/Fast_inverse_square_root
 
-float invSqrt(float x) {
+static float invSqrt(float x) {
 	float halfx = 0.5f * x;
 	float y = x;
 	long i = *(long*)&y;

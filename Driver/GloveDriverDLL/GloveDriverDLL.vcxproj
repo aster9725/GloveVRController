@@ -25,6 +25,7 @@
     <ClCompile Include="hid.c" />
     <ClCompile Include="InputConverter.cpp" />
     <ClCompile Include="MadgwickAHRS.c" />
+    <ClCompile Include="MahonyAHRS.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bones.h" />
@@ -33,6 +34,7 @@
     <ClInclude Include="hid.h" />
     <ClInclude Include="InputConverter.h" />
     <ClInclude Include="MadgwickAHRS.h" />
+    <ClInclude Include="MahonyAHRS.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
