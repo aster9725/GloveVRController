@@ -1,5 +1,6 @@
 #include "InputConverter.h"
 
+
 #define FS_SEL	131	// 250dgree/sec^2 constant
 #define CAL		10	// gyro sensor log
 
@@ -12,13 +13,13 @@ void InputConverter::convertUnit()
 	GYRO base = { 0 };
 	UINT8 cnt = (isLogFull ? CAL : (index + 1));
 
-	refinedData.acc.x = (float)(rawData.acc.x / 8192.0f);// * 9.8;
-	refinedData.acc.y = (float)(rawData.acc.y / 8192.0f);// * 9.8;
-	refinedData.acc.z = (float)(rawData.acc.z / 8192.0f);// * 9.8;
+	convertData.acc.x = (float)(rawData.acc.x / 8192.0f);
+	convertData.acc.y = (float)(rawData.acc.y / 8192.0f);
+	convertData.acc.z = (float)(rawData.acc.z / 8192.0f);
 
-	refinedData.mag.x = (float)rawData.mag.x * ((rawData.asa.x + 128.000f) / 256.000f) - 380;
-	refinedData.mag.y = (float)rawData.mag.y * ((rawData.asa.y + 128.000f) / 256.000f) + 85;
-	refinedData.mag.z = (float)rawData.mag.z * ((rawData.asa.z + 128.000f) / 256.000f) - 325;
+	convertData.mag.y = (float)rawData.mag.x * ((rawData.asa.x + 128.000f) / 256.000f) - 380;
+	convertData.mag.x = (float)rawData.mag.y * ((rawData.asa.y + 128.000f) / 256.000f) + 85;
+	convertData.mag.z = -(float)rawData.mag.z * ((rawData.asa.z + 128.000f) / 256.000f) - 325;
 
 	for (int i = 0; i < cnt; i++)
 	{
@@ -35,50 +36,63 @@ void InputConverter::convertUnit()
 	base.y /= cnt;
 	base.z /= cnt;
 
-	refinedData.gyro.x = (refinedData.gyro.x - base.x) / FS_SEL;
-	refinedData.gyro.y = (refinedData.gyro.y - base.y) / FS_SEL;
-	refinedData.gyro.z = (refinedData.gyro.z - base.z) / FS_SEL;
-
-	refinedData.gyro.x *= 0.0174533f;
-	refinedData.gyro.y *= 0.0174533f;
-	refinedData.gyro.z *= 0.0174533f;
+	convertData.gyro.x = (convertData.gyro.x - base.x) / FS_SEL;
+	convertData.gyro.y = (convertData.gyro.y - base.y) / FS_SEL;
+	convertData.gyro.z = (convertData.gyro.z - base.z) / FS_SEL;
 
 	index = (index + 1) % CAL;
 	if (!index && !isLogFull)
 		isLogFull = true;
 }
 
-bool InputConverter::SetRawData(USB_REPORT_DATA_T& src)
+bool InputConverter::SetData(HID_DEVICE& asyncDevice)
 {
-	rawData.acc.x = -src.acc.z;
-	rawData.acc.y = src.acc.y;
-	rawData.acc.z = src.acc.x;
+	//CHAR        szTempBuff[1024] = { 0 };
+	PHID_DATA pData = asyncDevice.InputData;
+	UINT        uLoop;
+	PINT16      p16 = &(rawData.acc.x);
+	PINT8       p8 = &(rawData.enc.index);	// We don't have thumb encoder now
+	for (uLoop = 0; uLoop < asyncDevice.InputDataLength; uLoop++)
+	{
+		//ReportToString(pData, szTempBuff, sizeof(szTempBuff));
+		//DriverLog("Dev] %s", szTempBuff);
+		if (uLoop < 9) {
+			*p16 = (INT16)(pData->ValueData.Value);
+			++p16;
+		}
+		else {
+			*p8 = (INT8)(pData->ValueData.Value);
+			++p8;
+		}
 
-	rawData.gyro.x = -src.gyro.z;
-	rawData.gyro.y = src.gyro.y;
-	rawData.gyro.z = src.gyro.x;
+		pData++;
+	}
+	
+	// match axis direction of mpu9250 & steamvr
+	uLoop = rawData.acc.z;
+	rawData.acc.z = 0-rawData.acc.x;
+	rawData.acc.x = 0-uLoop;
 
-	rawData.mag.x = -src.mag.z;
-	rawData.mag.y = src.mag.y;
-	rawData.mag.z = src.mag.x;
+	uLoop = rawData.gyro.z;
+	rawData.gyro.z = 0-rawData.gyro.x;
+	rawData.gyro.x = 0-uLoop;
 
-	rawData.enc = src.enc;
-
-	rawData.flex = src.flex;
-
-	/*rawData.enc.thumb	= src.enc.thumb;
-	rawData.enc.index	= src.enc.index;
-	rawData.enc.middle	= src.enc.middle;
-	rawData.enc.ring	= src.enc.ring;
-	rawData.enc.pinky	= src.enc.pinky;
-
-	rawData.flex.thumb	= src.flex.thumb;
-	rawData.flex.index	= src.flex.index;
-	rawData.flex.middle	= src.flex.middle;
-	rawData.flex.ring	= src.flex.ring;
-	rawData.flex.pinky	= src.flex.pinky;*/
+	uLoop = rawData.mag.z;
+	rawData.mag.z = 0-rawData.mag.x;
+	rawData.mag.x = 0-uLoop;
 
 	this->convertUnit();
+	//MadgwickAHRSupdate(&convertData);
+	MahonyAHRSupdate(&convertData);
+
+	convertData.acc.x *= 9.8f;
+	convertData.acc.y *= 9.8f;
+	convertData.acc.z *= 9.8f;
+
+	// Change gyro degree/sec to rad/sec
+	convertData.gyro.x *= 0.0174533f;
+	convertData.gyro.y *= 0.0174533f;
+	convertData.gyro.z *= 0.0174533f;
 
 	return true;
 }
