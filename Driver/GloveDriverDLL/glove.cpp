@@ -104,7 +104,7 @@ public:
 		m_active = true;
 		m_pose_thread = std::thread(&RightHandTest::UpdatePoseThread, this);
 		
-		DriverLog("Dev] Glove Contorller Activate Start");
+		//DriverLog("Dev] Glove Contorller Activate Start");
 		
 		return VRInitError_None;
 	}
@@ -115,7 +115,7 @@ public:
 		{
 			m_active = false;
 			m_pose_thread.join();
-			DriverLog("Dev] Glove Contorller Deactivated");
+			//DriverLog("Dev] Glove Contorller Deactivated");
 		}
 		CloseHidDevice(&asyncDevice);
 		free(gloveHID);
@@ -124,7 +124,7 @@ public:
 	void EnterStandby() override {}
 	void *GetComponent(const char *pchComponentNameAndVersion) override
 	{
-		DriverLog("GetComponent called for %s", pchComponentNameAndVersion);
+		//DriverLog("GetComponent called for %s", pchComponentNameAndVersion);
 		return nullptr;
 	}
 
@@ -173,7 +173,7 @@ public:
 					if (gloveHID)
 					{
 						memcpy(gloveHID, (hidList + i), sizeof(HID_DEVICE));
-						DriverLog("Dev] HID Device find VID.PID : %04x.%04x", gloveHID->Attributes.VendorID, gloveHID->Attributes.ProductID);
+						//DriverLog("Dev] HID Device find VID.PID : %04x.%04x", gloveHID->Attributes.VendorID, gloveHID->Attributes.ProductID);
 					}
 					else
 						DriverLog("Dev] HID Device List memory allocation failed");
@@ -232,6 +232,11 @@ public:
 								asyncDevice.Ppd);						
 
 							IC.SetData(asyncDevice);
+
+							DriverLog("%f, %f, %f",
+								IC.GetPoseData()->qPos.x,
+								IC.GetPoseData()->qPos.y,
+								IC.GetPoseData()->qPos.z);
 
 							m_frame_count++;
 							UpdateControllerPose();

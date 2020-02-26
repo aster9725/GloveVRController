@@ -13,13 +13,13 @@ void InputConverter::convertUnit()
 	GYRO base = { 0 };
 	UINT8 cnt = (isLogFull ? CAL : (index + 1));
 
-	convertData.acc.x = (float)(rawData.acc.x / 8192.0f);
-	convertData.acc.y = (float)(rawData.acc.y / 8192.0f);
-	convertData.acc.z = (float)(rawData.acc.z / 8192.0f);
+	convertData.acc.x = (float)(rawData.acc.x / 8192.0f)-0.006f;
+	convertData.acc.y = (float)(rawData.acc.y / 8192.0f)+0.021f;
+	convertData.acc.z = (float)(rawData.acc.z / 8192.0f)-0.96f;
 
-	convertData.mag.y = (float)rawData.mag.x * ((rawData.asa.x + 128.000f) / 256.000f) - 380;
-	convertData.mag.x = (float)rawData.mag.y * ((rawData.asa.y + 128.000f) / 256.000f) + 85;
-	convertData.mag.z = -(float)rawData.mag.z * ((rawData.asa.z + 128.000f) / 256.000f) - 325;
+	convertData.mag.y = (float)rawData.mag.x * ((rawData.asa.x + 128.000f) / 256.000f) - 380+8.514f-100;
+	convertData.mag.x = (float)rawData.mag.y * ((rawData.asa.y + 128.000f) / 256.000f) + 85+170.943f-173;
+	convertData.mag.z = -(float)rawData.mag.z * ((rawData.asa.z + 128.000f) / 256.000f) - 325-196.914f-50;
 
 	for (int i = 0; i < cnt; i++)
 	{
@@ -36,9 +36,9 @@ void InputConverter::convertUnit()
 	base.y /= cnt;
 	base.z /= cnt;
 
-	convertData.gyro.x = (convertData.gyro.x - base.x) / FS_SEL;
-	convertData.gyro.y = (convertData.gyro.y - base.y) / FS_SEL;
-	convertData.gyro.z = (convertData.gyro.z - base.z) / FS_SEL;
+	convertData.gyro.x = ((convertData.gyro.x - base.x) / FS_SEL)+4;
+	convertData.gyro.y = ((convertData.gyro.y - base.y) / FS_SEL)+1;
+	convertData.gyro.z = ((convertData.gyro.z - base.z) / FS_SEL);
 
 	index = (index + 1) % CAL;
 	if (!index && !isLogFull)

@@ -17,9 +17,9 @@ public:
 	InputConverter()
 	{
 		convertData = { 0 };
-		rawData.asa.x = 128;
-		rawData.asa.y = 127;
-		rawData.asa.z = -129;
+		rawData.asa.x = -380;
+		rawData.asa.y = 85;
+		rawData.asa.z = -325;
 	}
 	bool SetData(HID_DEVICE& asyncDevice);
 	PUSB_REPORT_DATA_T GetRawData() { return &rawData; }
