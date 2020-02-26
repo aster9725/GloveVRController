@@ -217,6 +217,7 @@ public:
 						waitStatus = WaitForSingleObject(completionEvent, 1000);
 						if (WAIT_OBJECT_0 == waitStatus)
 						{
+							DriverLog("Dev] Driver successfully got single USB data object");
 							readResult = GetOverlappedResult(asyncDevice.HidDevice, &overlap, &bytesTransferred, TRUE);
 
 							if (!m_active)
@@ -237,7 +238,6 @@ public:
 								IC.GetPoseData()->qPos.x,
 								IC.GetPoseData()->qPos.y,
 								IC.GetPoseData()->qPos.z);
-
 							m_frame_count++;
 							UpdateControllerPose();
 							UpdateHandSkeletonPoses();

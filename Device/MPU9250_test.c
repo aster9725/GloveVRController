@@ -13,7 +13,8 @@
 #include "MadgwickAHRS.h"
 #include "UART.h"
 #include "twi.h"
- 
+#include "MahonyAHRS.h"
+
 void calibrate();
 
 
@@ -66,6 +67,9 @@ int main()
 		temp = (m_z_h<<8) | m_z_l;
 		m_z = temp;
 		
+		//MadgwickAHRSupdate(g_x, g_y, g_z, a_x, a_y, a_z, m_x, m_y, m_z);
+		//MahonyAHRSupdate(g_x, g_y, g_z, a_x, a_y, a_z, m_x, m_y, m_z);
+		
 		USART_Transmit('S');
 		USART_Transmit(a_x_h);
 		USART_Transmit(a_x_l);
@@ -101,7 +105,7 @@ int main()
 		
 		USART_Transmit('E');
 		
-		_delay_ms(2);
+		_delay_ms(100);
 	} 
 
 } 
