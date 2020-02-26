@@ -1,10 +1,7 @@
 #include "openvr_driver.h"
 #include "bones.h"
 #include "driverlog.h"
-<<<<<<< HEAD
-=======
 #include "InputConverter.h"
->>>>>>> driver
 #include <thread>
 #include <atomic>
 #include <chrono>
@@ -189,7 +186,7 @@ public:
 		{
 			readAsync = OpenHidDevice(gloveHID->DevicePath, TRUE, FALSE, TRUE, FALSE, &asyncDevice);
 			if (readAsync)
-				//DriverLog("Dev] Open Device Async Success");
+				DriverLog("JGY] Open Device Async Success");
 			else {
 				DriverLog("Dev] Open Device Async Failed");
 				return;
@@ -220,7 +217,7 @@ public:
 						waitStatus = WaitForSingleObject(completionEvent, 1000);
 						if (WAIT_OBJECT_0 == waitStatus)
 						{
-							//DriverLog("Dev] Driver successfully got single USB data object");
+							DriverLog("Dev] Driver successfully got single USB data object");
 							readResult = GetOverlappedResult(asyncDevice.HidDevice, &overlap, &bytesTransferred, TRUE);
 
 							if (!m_active)
@@ -255,29 +252,29 @@ public:
 
 								pData++;
 							}
-							//DriverLog("Dev] RAWACC_X : %d", tmpRawData.acc.x);
-							//DriverLog("Dev] RAWACC_Y : %d", tmpRawData.acc.y);
-							//DriverLog("Dev] RAWACC_Z : %d", tmpRawData.acc.y);
+							DriverLog("Dev] RAWACC_X : %d", tmpRawData.acc.x);
+							DriverLog("Dev] RAWACC_Y : %d", tmpRawData.acc.y);
+							DriverLog("Dev] RAWACC_Z : %d", tmpRawData.acc.y);
 
-							//DriverLog("Dev] RAWGYRO_X : %d", tmpRawData.gyro.x);
-							//DriverLog("Dev] RAWGYRO_Y : %d", tmpRawData.gyro.y);
-							//DriverLog("Dev] RAWGYRO_Z : %d", tmpRawData.gyro.y);
+							DriverLog("Dev] RAWGYRO_X : %d", tmpRawData.gyro.x);
+							DriverLog("Dev] RAWGYRO_Y : %d", tmpRawData.gyro.y);
+							DriverLog("Dev] RAWGYRO_Z : %d", tmpRawData.gyro.y);
 
-							//DriverLog("Dev] RAWMAG_X : %d", tmpRawData.mag.x);
-							//DriverLog("Dev] RAWMAG_Y : %d", tmpRawData.mag.y);
-							//DriverLog("Dev] RAWMAG_Z : %d", tmpRawData.mag.y);
+							DriverLog("Dev] RAWMAG_X : %d", tmpRawData.mag.x);
+							DriverLog("Dev] RAWMAG_Y : %d", tmpRawData.mag.y);
+							DriverLog("Dev] RAWMAG_Z : %d", tmpRawData.mag.y);
 
-							//DriverLog("Dev] ENC_THUMB  : %d", tmpRawData.enc.thumb);
-							//DriverLog("Dev] ENC_INDEX  : %d", tmpRawData.enc.index);
-							//DriverLog("Dev] ENC_MIDDLE : %d", tmpRawData.enc.middle);
-							//DriverLog("Dev] ENC_RING   : %d", tmpRawData.enc.ring);
-							//DriverLog("Dev] ENC_PINKY  : %d", tmpRawData.enc.pinky);
+							DriverLog("Dev] ENC_THUMB  : %d", tmpRawData.enc.thumb);
+							DriverLog("Dev] ENC_INDEX  : %d", tmpRawData.enc.index);
+							DriverLog("Dev] ENC_MIDDLE : %d", tmpRawData.enc.middle);
+							DriverLog("Dev] ENC_RING   : %d", tmpRawData.enc.ring);
+							DriverLog("Dev] ENC_PINKY  : %d", tmpRawData.enc.pinky);
 
-							//DriverLog("Dev] FLEX_THUMB  : %d", tmpRawData.flex.thumb);
-							//DriverLog("Dev] FLEX_INDEX  : %d", tmpRawData.flex.index);
-							//DriverLog("Dev] FLEX_MIDDLE : %d", tmpRawData.flex.middle);
-							//DriverLog("Dev] FLEX_RING   : %d", tmpRawData.flex.ring);
-							//DriverLog("Dev] FLEX_PINKY  : %d", tmpRawData.flex.pinky);
+							DriverLog("Dev] FLEX_THUMB  : %d", tmpRawData.flex.thumb);
+							DriverLog("Dev] FLEX_INDEX  : %d", tmpRawData.flex.index);
+							DriverLog("Dev] FLEX_MIDDLE : %d", tmpRawData.flex.middle);
+							DriverLog("Dev] FLEX_RING   : %d", tmpRawData.flex.ring);
+							DriverLog("Dev] FLEX_PINKY  : %d", tmpRawData.flex.pinky);
 
 							IC.SetRawData(tmpRawData);
 							MadgwickAHRSupdate(IC.GetPoseData());
