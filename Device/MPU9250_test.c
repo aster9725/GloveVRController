@@ -3,109 +3,196 @@
 
 #define F_CPU 16000000UL
 
-#define FS_SEL 131
+#define FS_SEL 16.384
 
 #include<avr/io.h> 
 #include<avr/interrupt.h>
 #include<util/delay.h>
 #include<math.h>
 #include <stdio.h>
-#include "MadgwickAHRS.h"
-#include "UART.h"
-#include "twi.h"
+//#include "MadgwickAHRS.h"
 #include "MahonyAHRS.h"
+#include "UART.h"
+#include "mpu9250.h"
 
-void calibrate();
+
+float   gyroBias[3] = {0.96, -0.21, 0.12}, accelBias[3] = {0.00299, -0.00916, 0.00952};
+float   magBias[3] = {71.04, 122.43, -36.90}, magScale[3]  = {1.01, 1.03, 0.96};
 
 
-volatile int temp;
-volatile int bas_g_x,bas_g_y,bas_g_z;
-volatile int a_x,a_y,a_z;
-volatile int g_x,g_y,g_z;
-volatile int m_x,m_y,m_z;
-volatile float ASAX,ASAY,ASAZ;
+#define PRESCALE_VALUE				64
+#define CLOCKS_PER_MICRO			(F_CPU / 1000000L)
+#define CLOCKS_TO_MICROSECONDS(a)	((a) / CLOCKS_PER_MICRO)
+#define MICROSECONDS_PER_TIMER0_OVERFLOW	\
+(CLOCKS_TO_MICROSECONDS(PRESCALE_VALUE * 256))
+#define MILLIS_INCREMENT_PER_OVERFLOW		\
+(MICROSECONDS_PER_TIMER0_OVERFLOW / 1000)
+#define MICROS_INCREMENT_PER_OVERFLOW		\
+(MICROSECONDS_PER_TIMER0_OVERFLOW % 1000)
 
-#define I2C_SCL PC5
-#define I2C_SDA PC4
+
+volatile uint16_t timer0_millis = 0;
+volatile uint16_t timer0_micros = 0;
+
+inline uint16_t millis();
+void TIMER0_INIT();
 
 int main()
 {  
-
-	UART_INIT();
+	uint8_t i = 0;
+	uint8_t id = 0;
+	uint16_t ret = 0;
+	
+	uint8_t mpuData[19] = {0,};
+	int16_t raw_a[3], raw_g[3], raw_m[3];
+	float acc[3], gyro[3], mag[3], quaternion[4];
+	uint8_t encData[4] = {0,};
+	uint8_t flexData[10] = {0};
+		
+	float temp;
+		
+	char buffer[256];
+	
+	//UART
+	UART_INIT(9600);
 
 	//TWI(I2C)
-	DDRC |= (1 << I2C_SCL); // SCL 핀을 출력으로 설정
-	DDRC |= (1 << I2C_SDA); // SDA 핀을 출력으로 설정
-	TWBR = 12; // I2C 클록 주파수 설정 400KHz
-	TWCR = (1 << TWEN) | (1 << TWEA); // I2C 활성화, ACK 허용
+	TWI_Init();
+	
+	TIMER0_INIT();
+	
+	
+	sei();
+	
+	TWI_ReadReg(MPU9250_ADDRESS, WHO_AM_I_MPU9250, &id, 1);
+	
+	if(id == 0x71)
+	{
+		ret = MPU9250_init(&(accelBias[0]), &(gyroBias[0]));
+		if(ret)
+			goto INIT_FAIL;
+	}
+	else
+		goto CONNECT_FAIL;
 
-	MPU9250_init();
+	TWI_ReadReg(AK8963_ADDRESS, WHO_AM_I_AK8963, &id, 1);
+	if(id == 0x48)
+	{
+		ret = AK8963_init(M_100Hz,&(magBias[0]), &(magScale[0]));
+		if(ret)
+			goto INIT_FAIL;
+	}
+	else
+		goto CONNECT_FAIL;
+		
+	UART_printString("ID MATCH");
+	
+	AK8963_Calibrate(&(magBias[0]), &(magScale[0]));
+	
+	_delay_ms(1000);
 
 	while(1)
-	{ 
-
-		get_raw_data();
+	{
+		readAll(&(mpuData[0]));
 		
-		temp = (a_x_h<<8) | a_x_l;
-		a_x = temp;
-		temp = (a_y_h<<8) | a_y_l;
-		a_y = temp;
-		temp = (a_z_h<<8) | a_z_l;
-		a_z = temp;
+		for(i = 0; i < 3; i++)
+		{
+			raw_a[i] = ((int16_t)mpuData[i*2] << 8) | mpuData[i*2 + 1];
+			raw_g[i] = ((int16_t)mpuData[i*2 + 6] << 8) | mpuData[i*2 + 6 + 1];
+			raw_m[i] = ((int16_t)mpuData[i*2 + 12] << 8) | mpuData[i*2 + 12 + 1];
+		}
 		
-		temp = (g_x_h<<8) | g_x_l;
-		g_x = temp;
-		temp = (g_y_h<<8) | g_y_l;
-		g_y = temp;
-		temp = (g_z_h<<8) | g_z_l;
-		g_z = temp;
-
-		temp = (m_x_h<<8) | m_x_l;
-		m_x = temp;
-		temp = (m_y_h<<8) | m_y_l;
-		m_y = temp;
-		temp = (m_z_h<<8) | m_z_l;
-		m_z = temp;
+		acc[0] = (float)raw_a[0] * A_RES - accelBias[0];
+		acc[1] = (float)raw_a[1] * A_RES - accelBias[1];
+		acc[2] = (float)raw_a[2] * A_RES - accelBias[2];
 		
-		//MadgwickAHRSupdate(g_x, g_y, g_z, a_x, a_y, a_z, m_x, m_y, m_z);
-		//MahonyAHRSupdate(g_x, g_y, g_z, a_x, a_y, a_z, m_x, m_y, m_z);
+		gyro[0] = (float)raw_g[0] * G_RES;
+		gyro[1] = (float)raw_g[1] * G_RES;
+		gyro[2] = (float)raw_g[2] * G_RES;
 		
-		USART_Transmit('S');
-		USART_Transmit(a_x_h);
-		USART_Transmit(a_x_l);
-		USART_Transmit(a_y_h);
-		USART_Transmit(a_y_l);
-		USART_Transmit(a_z_h);
-		USART_Transmit(a_z_l);
+		mag[0] = (float)raw_m[0] * M_RES - magBias[0];
+		mag[1] = (float)raw_m[1] * M_RES - magBias[1];
+		mag[2] = (float)raw_m[2] * M_RES - magBias[2];
 		
-		USART_Transmit(g_x_h);
-		USART_Transmit(g_x_l);
-		USART_Transmit(g_y_h);
-		USART_Transmit(g_y_l);
-		USART_Transmit(g_z_h);
-		USART_Transmit(g_z_l);
+		mag[0] *= magScale[0];
+		mag[1] *= magScale[1];
+		mag[2] *= magScale[2];
 		
-		USART_Transmit(m_x_h);
-		USART_Transmit(m_x_l);
-		USART_Transmit(m_y_h);
-		USART_Transmit(m_y_l);
-		USART_Transmit(m_z_h);
-		USART_Transmit(m_z_l);
 		
-		USART_Transmit(m_y_h);
-		USART_Transmit(m_y_l);
-		USART_Transmit(m_z_h);
-		USART_Transmit(m_z_l);
 		
-		USART_Transmit(m_x_h);
-		USART_Transmit(m_x_l);
-		USART_Transmit(ASAX);
-		USART_Transmit(ASAY);
-		USART_Transmit(ASAZ);
+		acc[0] = 0 - acc[0];
 		
-		USART_Transmit('E');
+		gyro[0] = gyro[0] * (3.141592f/180.0f);
+		gyro[1] = (0.0f - gyro[1]) * (3.141592f/180.0f);
+		gyro[2] = (0.0f - gyro[2]) * (3.141592f/180.0f);
 		
-		_delay_ms(100);
+		temp = mag[1];
+		mag[1] = 0.0f - mag[0];
+		mag[0] = temp;
+				
+		MahonyAHRSupdate(&(gyro[0]), &(acc[0]), &(mag[0]), &(quaternion[0]));
+		
+		// format csv
+		//sprintf(buffer, "%+010.4f,%+010.4f,%+010.4f,,%+010.4f,%+010.4f,%+010.4f,,%+010.4f,%+010.4f,%+010.4f,,%+010.4f,%+010.4f,%+010.4f,%+010.4f,,,,\r\n", 
+			//acc[0], acc[1], acc[2], gyro[0], gyro[1], gyro[2], mag[0], mag[1], mag[2], quaternion[0], quaternion[1], quaternion[2], quaternion[3]);
+			
+		// format serial
+		sprintf(buffer, "%+010.4f    %+010.4f    %+010.4f  |  %+010.4f    %+010.4f    %+010.4f  |  %+010.4f    %+010.4f    %+010.4f  |  %+010.4f    %+010.4f    %+010.4f    %+010.4f\r\n",
+			acc[0], acc[1], acc[2], gyro[0], gyro[1], gyro[2], mag[0], mag[1], mag[2], quaternion[0], quaternion[1], quaternion[2], quaternion[3]);
+		
+		// format raw data
+		//sprintf(buffer, "%8d\t%8d\t%8d\r\n",raw_m[0], raw_m[1], raw_m[2]);
+		
+		UART_printString(buffer);
+		
+		//USART_Transmit('S');
+		//for(i = 0; i<18; i++)
+			//USART_Transmit(mpuData[i]);
+		//
+		//for(i = 0; i<4; i++)
+			//USART_Transmit(encData[i]);
+		//
+		//for(i = 0; i<5; i++)
+			//USART_Transmit(flexData[i]);
+		//USART_Transmit('E');
+		
+		_delay_ms(10);
 	} 
 
+CONNECT_FAIL:
+INIT_FAIL:
+	return 0;
 } 
+
+void TIMER0_INIT()
+{
+	TCCR0B |= (1<<CS01) | (1<<CS00);	// 64 prescale
+	TIMSK0 |= (1<<TOIE0);
+}
+
+inline uint16_t millis()
+{
+	uint16_t m;
+	uint8_t oldSREG = SREG;
+	
+	cli();
+	
+	m = timer0_millis;
+	SREG = oldSREG;
+	return m;
+}
+
+ISR(TIMER0_OVF_vect)
+{
+	unsigned long m = timer0_millis;
+	unsigned int f = timer0_micros;
+	
+	m += MILLIS_INCREMENT_PER_OVERFLOW;
+	f += MICROS_INCREMENT_PER_OVERFLOW;
+	
+	m += (f/1000);
+	f = f%1000;
+	
+	timer0_millis = m;
+	timer0_micros = f;
+}
