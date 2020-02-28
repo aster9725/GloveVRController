@@ -11,7 +11,7 @@
 #include <stdio.h>
 
 void UART_INIT(int baud);
-void USART_Transmit(unsigned char tx_data);
+void USART_Transmit(uint8_t tx_data);
 void UART_printString(char *str);
 void USART_Transmit_init4(int data);
 void UART_printUINT(uint32_t n);

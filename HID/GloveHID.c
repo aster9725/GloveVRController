@@ -38,68 +38,64 @@
 
 volatile uint8_t flagReportData = 0;	// FRD
 volatile USB_GloveReport_Data_t gGloveReportData = {0, };
-volatile uint8_t data;
 
 int main(void)
 {
-	SetupHardware();
-	
-	GlobalInterruptEnable();
-
-	for (;;)
-	{
-		HID_Task();
-		USB_USBTask();
-	}
+	//SetupHardware();
+	//
+	//GlobalInterruptEnable();
+//
+	//for (;;)
+	//{
+		//HID_Task();
+		//USB_USBTask();
+	//}
 }
 
 ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
 {
 	volatile static uint8_t read_byte_cnt = 0;
-	volatile static uint16_t* pXYZ = (uint16_t*)&(gGloveReportData.accX);
-	volatile static uint8_t* pEF = (uint8_t*)&(gGloveReportData.enc_index);
+	volatile static uint8_t* pProbe = (uint8_t*)&(gGloveReportData.accX);
+	volatile uint8_t data;
+	
 	data = UDR1;
-	if (data == START_CHAR)
+	
+	if(read_byte_cnt == sizeof(USB_GloveReport_Data_t) || pProbe > (uint8_t*)&(gGloveReportData.flex_pinky))
 	{
-		flagReportData &= ~(FRD_DIRTY);
-		flagReportData &= ~(FRD_READY);
-		pXYZ = (uint16_t*)&(gGloveReportData.accX);
-		pEF = (uint8_t*)&(gGloveReportData.enc_index);
 		read_byte_cnt = 0;
-		return;
-	}
-	else if(data == END_CHAR)
-	{
-		if(read_byte_cnt == sizeof(USB_GloveReport_Data_t)){
-			flagReportData &= ~(FRD_DIRTY);
-			flagReportData |= FRD_READY;
-		}
-		else {
-			flagReportData |= FRD_DIRTY;
-		}
-		return;
+		pProbe = (uint8_t*)&(gGloveReportData.accX);
 	}
 	
-	if(flagReportData & FRD_DIRTY)
-		return;
-	if(pXYZ < &(gGloveReportData.enc_index))
-	{
-		if(read_byte_cnt%2)
-		{
-			*pXYZ |= data;
-			++pXYZ;
-		}
-		else
-		*pXYZ = data<<8;
-	}
-	else
-	{
-		*pEF = data;
-		++pEF;
-	}
-
+	*pProbe = data;
+	
+	//if (data == START_CHAR)
+	//{
+		//flagReportData &= ~(FRD_DIRTY);
+		//flagReportData &= ~(FRD_READY);
+		//pProbe = (uint8_t*)&(gGloveReportData.accX);
+		//read_byte_cnt = 0;
+		//goto UART_RX_ISR_END;
+	//}
+	//else if(data == END_CHAR)
+	//{
+		//if(read_byte_cnt == sizeof(USB_GloveReport_Data_t)){
+			//flagReportData &= ~(FRD_DIRTY);
+			//flagReportData |= FRD_READY;
+		//}
+		//else {
+			//flagReportData |= FRD_DIRTY;
+		//}
+		//goto UART_RX_ISR_END;
+	//}
+	//
+	//if(flagReportData & FRD_DIRTY)
+		//return;
+	//if(pProbe <= (uint8_t*)&(gGloveReportData.flex_pinky))
+	//{
+		//*pProbe = data;
+	//}
+	++pProbe;
 	++read_byte_cnt;
-
 }
 
 void SetupHardware(void)
@@ -219,6 +215,7 @@ bool GetNextReport(USB_GloveReport_Data_t* const ReportData)
 		ReportData->geoY = gGloveReportData.geoY;
 		ReportData->geoZ = gGloveReportData.geoZ;
 		
+		ReportData->enc_thumb	= gGloveReportData.enc_thumb;
 		ReportData->enc_index	= gGloveReportData.enc_index;
 		ReportData->enc_middle	= gGloveReportData.enc_middle;
 		ReportData->enc_ring	= gGloveReportData.enc_ring;

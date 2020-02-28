@@ -34,6 +34,15 @@ float   magBias[3] = {71.04, 122.43, -36.90}, magScale[3]  = {1.01, 1.03, 0.96};
 volatile uint16_t timer0_millis = 0;
 volatile uint16_t timer0_micros = 0;
 
+typedef struct {
+	float acc[3];
+	float gyro[3];
+	float mag[3];
+	uint8_t encData[5];
+	uint8_t flexData[5];
+	uint8_t dataEnd;
+}SENS_DATA_T, * PSENS_DATA_T;
+
 inline uint16_t millis();
 void TIMER0_INIT();
 
@@ -44,14 +53,18 @@ int main()
 	uint16_t ret = 0;
 	
 	uint8_t mpuData[19] = {0,};
+	SENS_DATA_T sdt = {0,};
 	int16_t raw_a[3], raw_g[3], raw_m[3];
-	float acc[3], gyro[3], mag[3], quaternion[4];
-	uint8_t encData[4] = {0,};
-	uint8_t flexData[10] = {0};
+	float quaternion[4];
+		
+	uint8_t* dp;
 		
 	float temp;
 		
 	char buffer[256];
+	
+	sdt.encData[4] = 5;
+	sdt.flexData[4] = 5;
 	
 	//UART
 	UART_INIT(9600);
@@ -85,16 +98,16 @@ int main()
 	else
 		goto CONNECT_FAIL;
 		
-	UART_printString("ID MATCH");
+	//UART_printString("ID MATCH");
 	
-	AK8963_Calibrate(&(magBias[0]), &(magScale[0]));
-	
-	_delay_ms(1000);
+	//AK8963_Calibrate(&(magBias[0]), &(magScale[0]));
+	//UART_printString("Calibarating Start\r\n");
+	//_delay_ms(1000);
 
 	while(1)
 	{
-		readAll(&(mpuData[0]));
-		
+		ret = readAll(&(mpuData[0]));
+
 		for(i = 0; i < 3; i++)
 		{
 			raw_a[i] = ((int16_t)mpuData[i*2] << 8) | mpuData[i*2 + 1];
@@ -102,58 +115,54 @@ int main()
 			raw_m[i] = ((int16_t)mpuData[i*2 + 12] << 8) | mpuData[i*2 + 12 + 1];
 		}
 		
-		acc[0] = (float)raw_a[0] * A_RES - accelBias[0];
-		acc[1] = (float)raw_a[1] * A_RES - accelBias[1];
-		acc[2] = (float)raw_a[2] * A_RES - accelBias[2];
+		sdt.acc[0] = (float)raw_a[0] * A_RES - accelBias[0];
+		sdt.acc[1] = (float)raw_a[1] * A_RES - accelBias[1];
+		sdt.acc[2] = (float)raw_a[2] * A_RES - accelBias[2];
 		
-		gyro[0] = (float)raw_g[0] * G_RES;
-		gyro[1] = (float)raw_g[1] * G_RES;
-		gyro[2] = (float)raw_g[2] * G_RES;
+		sdt.gyro[0] = (float)raw_g[0] * G_RES;
+		sdt.gyro[1] = (float)raw_g[1] * G_RES;
+		sdt.gyro[2] = (float)raw_g[2] * G_RES;
 		
-		mag[0] = (float)raw_m[0] * M_RES - magBias[0];
-		mag[1] = (float)raw_m[1] * M_RES - magBias[1];
-		mag[2] = (float)raw_m[2] * M_RES - magBias[2];
+		sdt.mag[0] = (float)raw_m[0] * M_RES - magBias[0];
+		sdt.mag[1] = (float)raw_m[1] * M_RES - magBias[1];
+		sdt.mag[2] = (float)raw_m[2] * M_RES - magBias[2];
 		
-		mag[0] *= magScale[0];
-		mag[1] *= magScale[1];
-		mag[2] *= magScale[2];
-		
-		
-		
-		acc[0] = 0 - acc[0];
-		
-		gyro[0] = gyro[0] * (3.141592f/180.0f);
-		gyro[1] = (0.0f - gyro[1]) * (3.141592f/180.0f);
-		gyro[2] = (0.0f - gyro[2]) * (3.141592f/180.0f);
-		
-		temp = mag[1];
-		mag[1] = 0.0f - mag[0];
-		mag[0] = temp;
-				
-		MahonyAHRSupdate(&(gyro[0]), &(acc[0]), &(mag[0]), &(quaternion[0]));
+		sdt.mag[0] *= magScale[0];
+		sdt.mag[1] *= magScale[1];
+		sdt.mag[2] *= magScale[2];
+
+		//acc[0] = 0 - acc[0];
+		//
+		//gyro[0] = gyro[0] * (3.141592f/180.0f);
+		//gyro[1] = (0.0f - gyro[1]) * (3.141592f/180.0f);
+		//gyro[2] = (0.0f - gyro[2]) * (3.141592f/180.0f);
+		//
+		//temp = mag[1];
+		//mag[1] = 0.0f - mag[0];
+		//mag[0] = temp;
+				//
+		//MahonyAHRSupdate(&(gyro[0]), &(acc[0]), &(mag[0]), &(quaternion[0]));
 		
 		// format csv
 		//sprintf(buffer, "%+010.4f,%+010.4f,%+010.4f,,%+010.4f,%+010.4f,%+010.4f,,%+010.4f,%+010.4f,%+010.4f,,%+010.4f,%+010.4f,%+010.4f,%+010.4f,,,,\r\n", 
 			//acc[0], acc[1], acc[2], gyro[0], gyro[1], gyro[2], mag[0], mag[1], mag[2], quaternion[0], quaternion[1], quaternion[2], quaternion[3]);
 			
 		// format serial
-		sprintf(buffer, "%+010.4f    %+010.4f    %+010.4f  |  %+010.4f    %+010.4f    %+010.4f  |  %+010.4f    %+010.4f    %+010.4f  |  %+010.4f    %+010.4f    %+010.4f    %+010.4f\r\n",
-			acc[0], acc[1], acc[2], gyro[0], gyro[1], gyro[2], mag[0], mag[1], mag[2], quaternion[0], quaternion[1], quaternion[2], quaternion[3]);
+		//sprintf(buffer, "%+010.4f    %+010.4f    %+010.4f  |  %+010.4f    %+010.4f    %+010.4f  |  %+010.4f    %+010.4f    %+010.4f  |  %+010.4f    %+010.4f    %+010.4f    %+010.4f\r\n",
+			//acc[0], acc[1], acc[2], gyro[0], gyro[1], gyro[2], mag[0], mag[1], mag[2], quaternion[0], quaternion[1], quaternion[2], quaternion[3]);
 		
 		// format raw data
 		//sprintf(buffer, "%8d\t%8d\t%8d\r\n",raw_m[0], raw_m[1], raw_m[2]);
+		//
+		 //UART_printString(buffer);
 		
-		UART_printString(buffer);
 		
+
 		//USART_Transmit('S');
-		//for(i = 0; i<18; i++)
-			//USART_Transmit(mpuData[i]);
-		//
-		//for(i = 0; i<4; i++)
-			//USART_Transmit(encData[i]);
-		//
-		//for(i = 0; i<5; i++)
-			//USART_Transmit(flexData[i]);
+		for(dp = (uint8_t*)&(sdt.acc[0]); dp < (uint8_t*)&(sdt.dataEnd); dp++)
+		{				 
+			USART_Transmit(*dp);
+		}
 		//USART_Transmit('E');
 		
 		_delay_ms(10);

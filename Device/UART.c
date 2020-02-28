@@ -21,7 +21,7 @@ void UART_INIT(int baud)
 	UCSR0B |= _BV(RXCIE0);	// Enable ISR RX_Complete
 }
 
-void USART_Transmit(unsigned char tx_data)
+void USART_Transmit(uint8_t tx_data)
 {
 	while( !(UCSR0A & (1 <<UDRE0)));
 	UDR0 = tx_data;
