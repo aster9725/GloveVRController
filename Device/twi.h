@@ -14,7 +14,7 @@
 #include <avr/interrupt.h>
 #define F_CPU 16000000UL
 
-void TWI_Init(void);
+void TWI_INIT(void);
 uint8_t TWI_Start(uint8_t address);
 uint8_t TWI_Write(uint8_t data);
 uint8_t TWI_ReadACK(void);

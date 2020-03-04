@@ -163,7 +163,8 @@ public:
 		ULONG numDevices;
 		BOOLEAN readAsync;
 
-		if (FindKnownHidDevices(&hidList, &numDevices) == TRUE)
+	WAIT_FOR_CONNECT:
+		while (FindKnownHidDevices(&hidList, &numDevices) == TRUE)
 		{
 			for (ULONG i = 0; i <= numDevices; i++)
 			{
@@ -173,15 +174,16 @@ public:
 					if (gloveHID)
 					{
 						memcpy(gloveHID, (hidList + i), sizeof(HID_DEVICE));
+						break;
 						//DriverLog("Dev] HID Device find VID.PID : %04x.%04x", gloveHID->Attributes.VendorID, gloveHID->Attributes.ProductID);
 					}
 					else
 						DriverLog("Dev] HID Device List memory allocation failed");
 				}
 			}
+			DriverLog("Dev] HID Devices Not Found. Sleep 500ms");
+			Sleep(500);
 		}
-		else
-			DriverLog("Dev] HID Devices Not Found");
 
 		if (hidList)
 			free(hidList);
@@ -196,15 +198,15 @@ public:
 				return;
 			}
 
-			HANDLE  completionEvent;
+			HANDLE  completionEvent = NULL;
 			BOOL    readResult;
 			DWORD   waitStatus;
 			ULONG   numReadsDone;
 			OVERLAPPED overlap;
 			DWORD      bytesTransferred;
-			USB_REPORT_DATA_T tmpRawData;
 
-			completionEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+			if(!completionEvent)
+				completionEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 			if (completionEvent)
 			{
@@ -247,7 +249,9 @@ public:
 					}
 					else
 					{
-						DriverLog("Dev] Read Device File Failed");
+						DriverLog("Dev] Read Device File Failed. Close & wait for device is connected");
+						CloseHidDevice(gloveHID);
+						goto WAIT_FOR_CONNECT;
 					}
 				}
 			}

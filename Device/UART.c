@@ -18,7 +18,7 @@ void UART_INIT(int baud)
 	
 	UCSR0B |= _BV(RXEN0);	// Enable RX
 	UCSR0B |= _BV(TXEN0);	// Enable TX
-	UCSR0B |= _BV(RXCIE0);	// Enable ISR RX_Complete
+	//UCSR0B |= _BV(RXCIE0);	// Enable ISR RX_Complete
 }
 
 void USART_Transmit(uint8_t tx_data)
@@ -33,7 +33,7 @@ void UART_printString(char *str)
 	USART_Transmit(str[i]);
 }
 
-void USART_Transmit_init4(int data)
+void USART_Transmit_int4(int data)
 {
 	if(data < 0)
 	{
@@ -74,4 +74,14 @@ void UART_printUINT(uint32_t n)
 	
 	for(; i >= 0; i--)
 	USART_Transmit(str[i]);
+}
+
+void UART_EncodeAscii85(uint8_t* data, uint8_t cnt)
+{
+	
+}
+
+void UART_DecodeAscii85(uint8_t* data, uint8_t cnt)
+{
+	
 }

@@ -60,9 +60,9 @@
 		float gyroY;
 		float gyroZ;
 		
-		float geoX;
-		float geoY;
-		float geoZ;
+		float magX;
+		float magY;
+		float magZ;
 		
 		int8_t enc_thumb;
 		int8_t enc_index;

@@ -41,15 +41,15 @@ volatile USB_GloveReport_Data_t gGloveReportData = {0, };
 
 int main(void)
 {
-	//SetupHardware();
-	//
-	//GlobalInterruptEnable();
-//
-	//for (;;)
-	//{
-		//HID_Task();
-		//USB_USBTask();
-	//}
+	SetupHardware();
+	
+	GlobalInterruptEnable();
+
+	for (;;)
+	{
+		HID_Task();
+		USB_USBTask();
+	}
 }
 
 ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
@@ -60,10 +60,11 @@ ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
 	
 	data = UDR1;
 	
-	if(read_byte_cnt == sizeof(USB_GloveReport_Data_t) || pProbe > (uint8_t*)&(gGloveReportData.flex_pinky))
+	if(read_byte_cnt >= sizeof(USB_GloveReport_Data_t) || pProbe > (uint8_t*)&(gGloveReportData.flex_pinky))
 	{
 		read_byte_cnt = 0;
 		pProbe = (uint8_t*)&(gGloveReportData.accX);
+		flagReportData |= FRD_READY;
 	}
 	
 	*pProbe = data;
@@ -90,10 +91,10 @@ ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
 	//
 	//if(flagReportData & FRD_DIRTY)
 		//return;
-	//if(pProbe <= (uint8_t*)&(gGloveReportData.flex_pinky))
-	//{
-		//*pProbe = data;
-	//}
+	if(pProbe <= (uint8_t*)&(gGloveReportData.flex_pinky))
+	{
+		*pProbe = data;
+	}
 	++pProbe;
 	++read_byte_cnt;
 }
@@ -200,20 +201,20 @@ void ProcessGenericHIDReport(uint8_t* DataArray)
 bool GetNextReport(USB_GloveReport_Data_t* const ReportData)
 {
 	bool ret = false;
-	cli();
+
 	if(flagReportData & FRD_READY)
 	{
 		ReportData->accX = gGloveReportData.accX;
-		ReportData->accY = gGloveReportData.accX;
-		ReportData->accZ = gGloveReportData.accX;
+		ReportData->accY = gGloveReportData.accY;
+		ReportData->accZ = gGloveReportData.accZ;
 		
 		ReportData->gyroX = gGloveReportData.gyroX;
 		ReportData->gyroY = gGloveReportData.gyroY;
 		ReportData->gyroZ = gGloveReportData.gyroZ;
 		
-		ReportData->geoX = gGloveReportData.geoX;
-		ReportData->geoY = gGloveReportData.geoY;
-		ReportData->geoZ = gGloveReportData.geoZ;
+		ReportData->magX = gGloveReportData.magX;
+		ReportData->magY = gGloveReportData.magY;
+		ReportData->magZ = gGloveReportData.magZ;
 		
 		ReportData->enc_thumb	= gGloveReportData.enc_thumb;
 		ReportData->enc_index	= gGloveReportData.enc_index;
@@ -230,7 +231,7 @@ bool GetNextReport(USB_GloveReport_Data_t* const ReportData)
 		flagReportData &= ~(FRD_READY);
 		ret = true;
 	}
-	sei();
+
 	return ret;
 }
 

@@ -12,7 +12,7 @@
 #define TWBR_val ((((F_CPU / F_SCL) / Prescaler) - 16 ) / 2)
 
 
-void TWI_Init(void)
+void TWI_INIT(void)
 {
 	DDRC = 0x00;
 	PORTC = 0x30;

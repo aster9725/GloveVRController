@@ -275,7 +275,7 @@ uint8_t MPU9250_Calibrate(float* a_bias, float* g_bias)
 	ret = TWI_WriteReg(MPU9250_ADDRESS, FIFO_EN, &regVal, 1);
 	if(ret)	return ADDIDX(ret, 8);
 	
-	_delay_ms(40);
+	_delay_ms(100);	// wait for fifo is filled by acc/gyro data
 	
 	regVal = 0x00; // disable fifo
 	ret = TWI_WriteReg(MPU9250_ADDRESS, FIFO_EN, &regVal, 1);
@@ -304,7 +304,7 @@ uint8_t MPU9250_Calibrate(float* a_bias, float* g_bias)
 		gyro_bias[2]  += (int32_t) g_temp[2];
 	}
 	
-	acc_bias[0] /= (int32_t)packet_count; // set bias to average fo fifo input
+	acc_bias[0] /= (int32_t)packet_count; // set bias to average of fifo input
 	acc_bias[1] /= (int32_t)packet_count;
 	acc_bias[2] /= (int32_t)packet_count;
 	gyro_bias[0] /= (int32_t)packet_count;
@@ -317,7 +317,7 @@ uint8_t MPU9250_Calibrate(float* a_bias, float* g_bias)
 		//acc_bias[2] -= (int32_t) a_sens;
 
 	// Construct the gyro biases for push to the hardware gyro bias registers, which are reset to zero upon device startup
-	data[0] = (-gyro_bias[0]/4  >> 8) & 0xFF; // Divide by 4 to get 32.9 LSB per deg/s to conform to expected bias input format
+	data[0] = (-gyro_bias[0]/4  >> 8) & 0xFF; // Divide by 4 to get 32.9 LSB per degree/s to conform to expected bias input format
 	data[1] = (-gyro_bias[0]/4)       & 0xFF; // Biases are additive, so change sign on calculated average gyro biases
 	data[2] = (-gyro_bias[1]/4  >> 8) & 0xFF;
 	data[3] = (-gyro_bias[1]/4)       & 0xFF;
@@ -336,10 +336,8 @@ uint8_t MPU9250_Calibrate(float* a_bias, float* g_bias)
 	g_bias[0] = (float) gyro_bias[0]/(float) g_sens;
 	g_bias[1] = (float) gyro_bias[1]/(float) g_sens;
 	g_bias[2] = (float) gyro_bias[2]/(float) g_sens;
-	
-	
-		
-	TWI_ReadReg(MPU9250_ADDRESS, XA_OFFSET_H, &(data[0]), 6);
+
+	TWI_ReadReg(MPU9250_ADDRESS, XA_OFFSET_H, &(data[0]), 6);	// Read acc offsets to get temp bit
 	
 	acc_bias_reg[0] = (int32_t) (((int16_t)data[0] << 8) | data[1]);
 	acc_bias_reg[1] = (int32_t) (((int16_t)data[2] << 8) | data[3]);
