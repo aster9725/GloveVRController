@@ -22,7 +22,7 @@ using namespace std;
 static LIST               PhysicalDeviceList;
 
 static const char* device_manufacturer = "sysglove";
-static const char *device_controller_type = DEVICE_NAME;
+static const char* device_controller_type = DEVICE_NAME;
 static const char* device_model_number = DEVICE_NAME "1";
 static const char* device_serial_number = DEVICE_NAME "SN0";
 static const char* device_render_model_name = "{" DEVICE_NAME "}/rendermodels/" DEVICE_NAME;
@@ -174,13 +174,14 @@ public:
 					if (gloveHID)
 					{
 						memcpy(gloveHID, (hidList + i), sizeof(HID_DEVICE));
-						break;
 						//DriverLog("Dev] HID Device find VID.PID : %04x.%04x", gloveHID->Attributes.VendorID, gloveHID->Attributes.ProductID);
 					}
 					else
 						DriverLog("Dev] HID Device List memory allocation failed");
 				}
 			}
+			if (gloveHID != NULL)
+				break;
 			DriverLog("Dev] HID Devices Not Found. Sleep 500ms");
 			Sleep(500);
 		}
@@ -251,6 +252,8 @@ public:
 					{
 						DriverLog("Dev] Read Device File Failed. Close & wait for device is connected");
 						CloseHidDevice(gloveHID);
+						free(gloveHID);
+						gloveHID = NULL;
 						goto WAIT_FOR_CONNECT;
 					}
 				}
