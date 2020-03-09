@@ -14,6 +14,7 @@
 #include "MahonyAHRS.h"
 #include "UART.h"
 #include "mpu9250.h"
+#include "base85.h"
 
 
 float   gyroBias[3] = {0.96, -0.21, 0.12}, accelBias[3] = {0.00299, -0.00916, 0.00952};
@@ -64,13 +65,15 @@ int main()
 {  
 	uint8_t i = 0;
 	uint16_t ret = 0;
-	unsigned long timeStamp = 0;
+	unsigned long timeStampMPU9250 = 0;
 	
 	float swap;
 	uint8_t mpuData[19] = {0,};
 	int16_t raw_a[3], raw_g[3], raw_m[3];
-	volatile SENS_DATA_T sdt = {0,};
-	volatile uint8_t volatile *  pData = &sdt;
+	volatile SENS_DATA_T sdt = {0,};//, sdt2;
+
+	
+	uint8_t reportDataBuffer[62] = { '[', }; // 2 more space for Start( [ ) / End( ] )
 	
 #ifdef _DEBUG
 	float quaternion[4];
@@ -118,9 +121,9 @@ int main()
 
 	while(1)
 	{
-		if(millis() - timeStamp < 2)
+		if(millis() - timeStampMPU9250 < 5)
 			continue;
-		timeStamp = millis();
+		timeStampMPU9250 = millis();
 		ret = readAll(&(mpuData[0]));
 		if(ret)
 		{
@@ -177,37 +180,10 @@ int main()
 		UART_printString(buffer);
 #endif
 
-		// ACC, GYRO, MAG
-		// ** check order **
-		// ** Accelerometer MUST send at first
-		for(ret = 0, pData = (uint8_t *)&(sdt.acc[0]); ret < 3; ret++)
-		{
-			for(i = 0; i < 3; i++)
-			{
-				mpuData[4*i + 0] = *(pData++);
-				mpuData[4*i + 1] = *(pData++);
-				mpuData[4*i + 2] = *(pData++);
-				mpuData[4*i + 3] = *(pData++);
-			}
-			
-			for(i = 0; i < 12; i++)
-				USART_Transmit(mpuData[i]);
-		}
-		
-		// ENCODER, FLEX
-		// ** check order **
-		// ** Encoder MUST send at first
-		for(i = 0; i < 2; i++)
-		{
-			mpuData[5*i + 0] = *(pData++);
-			mpuData[5*i + 1] = *(pData++);
-			mpuData[5*i + 2] = *(pData++);
-			mpuData[5*i + 3] = *(pData++);
-			mpuData[5*i + 4] = *(pData++);
-		}
-		
-		for(i = 0; i < 10; i++)
-			USART_Transmit(mpuData[i]);
+		btob85(reportDataBuffer+1, (uint8_t*)&sdt, 46);
+		for(i = 0; reportDataBuffer[i] != ']'; ++i)
+			USART_Transmit(reportDataBuffer[i]);
+		USART_Transmit(']');
 	} 
 READ_FAIL:
 CONNECT_FAIL:

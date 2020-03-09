@@ -16,11 +16,11 @@ bool InputConverter::SetData(HID_DEVICE& asyncDevice)
 		//ReportToString(pData, szTempBuff, sizeof(szTempBuff));
 		//DriverLog("Dev] %s", szTempBuff);
 		if (uLoop < 9) {
-			*pFloat = (FLOAT)(pData->ValueData.Value);
+			memcpy(pFloat, &(pData->ValueData.Value), 4);
 			++pFloat;
 		}
 		else {
-			*p8 = (INT8)(pData->ValueData.Value);
+			memcpy(p8, &(pData->ValueData.Value), 1);
 			++p8;
 		}
 

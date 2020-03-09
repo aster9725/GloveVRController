@@ -31,12 +31,8 @@
 
 #include "GloveHID.h"
 #include "UART.h"
+#include "base85.h"
 
-#define FRD_READY		(1<<0)
-#define FRD_REPORTED	(1<<1)
-#define FRD_DIRTY		(1<<2)
-
-volatile uint8_t flagReportData = 0;	// FRD
 volatile USB_GloveReport_Data_t gGloveReportData = {0, };
 
 int main(void)
@@ -50,53 +46,6 @@ int main(void)
 		HID_Task();
 		USB_USBTask();
 	}
-}
-
-ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
-{
-	volatile static uint8_t read_byte_cnt = 0;
-	volatile static uint8_t* pProbe = (uint8_t*)&(gGloveReportData.accX);
-	volatile uint8_t data;
-	
-	data = UDR1;
-	
-	if(read_byte_cnt >= sizeof(USB_GloveReport_Data_t) || pProbe > (uint8_t*)&(gGloveReportData.flex_pinky))
-	{
-		read_byte_cnt = 0;
-		pProbe = (uint8_t*)&(gGloveReportData.accX);
-		flagReportData |= FRD_READY;
-	}
-	
-	*pProbe = data;
-	
-	//if (data == START_CHAR)
-	//{
-		//flagReportData &= ~(FRD_DIRTY);
-		//flagReportData &= ~(FRD_READY);
-		//pProbe = (uint8_t*)&(gGloveReportData.accX);
-		//read_byte_cnt = 0;
-		//goto UART_RX_ISR_END;
-	//}
-	//else if(data == END_CHAR)
-	//{
-		//if(read_byte_cnt == sizeof(USB_GloveReport_Data_t)){
-			//flagReportData &= ~(FRD_DIRTY);
-			//flagReportData |= FRD_READY;
-		//}
-		//else {
-			//flagReportData |= FRD_DIRTY;
-		//}
-		//goto UART_RX_ISR_END;
-	//}
-	//
-	//if(flagReportData & FRD_DIRTY)
-		//return;
-	if(pProbe <= (uint8_t*)&(gGloveReportData.flex_pinky))
-	{
-		*pProbe = data;
-	}
-	++pProbe;
-	++read_byte_cnt;
 }
 
 void SetupHardware(void)
@@ -228,7 +177,8 @@ bool GetNextReport(USB_GloveReport_Data_t* const ReportData)
 		ReportData->flex_ring	= gGloveReportData.flex_ring;
 		ReportData->flex_pinky	= gGloveReportData.flex_pinky;
 		
-		flagReportData &= ~(FRD_READY);
+		flagReportData &= ~FRD_READY;
+		flagReportData |= FRD_SEND;
 		ret = true;
 	}
 
@@ -284,3 +234,35 @@ void HID_Task(void)
 	}
 }
 
+ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
+{
+	
+	volatile static uint8_t* pProbe = rxUART;
+	volatile uint8_t data;
+	
+	data = UDR1;
+	
+	if (data == '[' && (flagReportData & FRD_SEND))
+	{
+		flagReportData &= ~FRD_SEND;
+		flagReportData |= FRD_READ;
+		pProbe = rxUART;
+		goto END_UART_ISR;
+	}
+	if(data == ']' && (flagReportData & FRD_READ))
+	{
+		flagReportData &= ~FRD_READ;
+		flagReportData |= FRD_READY;
+		b85tob((uint8_t*)&gGloveReportData, rxUART);
+		goto END_UART_ISR;
+	}
+	
+	if(pProbe < rxUART + RXUART_BUFF_SIZE)
+	{
+		*pProbe = data;
+	}
+
+	++pProbe;
+	END_UART_ISR:
+	return;
+}

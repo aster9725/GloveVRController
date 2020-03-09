@@ -260,19 +260,19 @@ $(OBJDIR)/%.o: %.S $(MAKEFILE_LIST)
 	$(CROSS)-objcopy -O binary -R .eeprom -R .fuse -R .lock -R .signature $< $@
 
 # Extracts out the loadable EEPROM memory data from the project ELF file, and creates an Intel HEX format file of it
-%.eep: %.elf
-	@echo $(MSG_OBJCPY_CMD) Extracting EEP file data from \"$<\"
-	$(CROSS)-objcopy -O ihex -j .eeprom --set-section-flags=.eeprom="alloc,load" --change-section-lma .eeprom=0 --no-change-warnings $< $@ || exit 0
+#%.eep: %.elf
+#	@echo $(MSG_OBJCPY_CMD) Extracting EEP file data from \"$<\"
+#	$(CROSS)-objcopy -O ihex -j .eeprom --set-section-flags=.eeprom="alloc,load" --change-section-lma .eeprom=0 --no-change-warnings $< $@ || exit 0
 
 # Creates an assembly listing file from an input project ELF file, containing interleaved assembly and source data
-%.lss: %.elf
-	@echo $(MSG_OBJDMP_CMD) Extracting LSS file data from \"$<\"
-	$(CROSS)-objdump -h -d -S -z $< > $@
+#%.lss: %.elf
+#	@echo $(MSG_OBJDMP_CMD) Extracting LSS file data from \"$<\"
+#	$(CROSS)-objdump -h -d -S -z $< > $@
 
 # Creates a symbol file listing the loadable and discarded symbols from an input project ELF file
-%.sym: %.elf
-	@echo $(MSG_NM_CMD) Extracting SYM file data from \"$<\"
-	$(CROSS)-nm -n $< > $@
+#%.sym: %.elf
+#	@echo $(MSG_NM_CMD) Extracting SYM file data from \"$<\"
+#	$(CROSS)-nm -n $< > $@
 
 # Include build dependency files
 -include $(DEPENDENCY_FILES)

@@ -6,6 +6,10 @@
  */ 
 
 #include "UART.h"
+#include <avr/interrupt.h>
+
+volatile uint8_t flagReportData = FRD_SEND;	// FRD
+volatile uint8_t rxUART[RXUART_BUFF_SIZE] = {0, };
 
 void UART_INIT(int baud)
 {

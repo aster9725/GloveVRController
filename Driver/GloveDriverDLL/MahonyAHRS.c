@@ -137,9 +137,11 @@ void MahonyAHRSupdate(PGLOVE_POSE_DATA_T poseData) {
 	gx *= (0.5f * (1.0f / sampleFreq));		// pre-multiply common factors
 	gy *= (0.5f * (1.0f / sampleFreq));
 	gz *= (0.5f * (1.0f / sampleFreq));
+
 	qa = q0;
 	qb = q1;
 	qc = q2;
+
 	q0 += (-qb * gx - qc * gy - q3 * gz);
 	q1 += (qa * gx + qc * gz - q3 * gy);
 	q2 += (qa * gy - qb * gz + q3 * gx);

@@ -57,7 +57,7 @@ uint16_t MPU9250_init(float* a_bias, float* g_bias)
 	// Set sample rate = gyroscope output rate/(1 + SMPLRT_DIV)
 	data = 0x04;
 	ret = TWI_WriteReg(MPU9250_ADDRESS, SMPLRT_DIV, &data, 1);	// Use a 1000 Hz rate; a rate consistent with the filter update rate
-	if(ret)													// determined inset in CONFIG above
+	if(ret)														// determined inset in CONFIG above
 		return ADDIDX(ret, 8);
 	
 	// Set gyroscope full scale range
@@ -66,7 +66,7 @@ uint16_t MPU9250_init(float* a_bias, float* g_bias)
 	if(ret) return ADDIDX(ret, 8);
 	data &= ~0x18;	// Clear AFS bits [4:3] 
 	data &= ~0x03;	// Fchoice bits [1:0]
-	data |= (GFS_500DPS << 3);	// Set full scale for the gyro, dlpf 250Hz
+	data |= (GFS_250DPS << 3);	// Set full scale for the gyro, dlpf 250Hz
 	ret = TWI_WriteReg(MPU9250_ADDRESS, GYRO_CONFIG, &data, 1);
 	if(ret) return ADDIDX(ret, 8);
 	
@@ -74,7 +74,7 @@ uint16_t MPU9250_init(float* a_bias, float* g_bias)
 	ret = TWI_ReadReg(MPU9250_ADDRESS, ACCEL_CONFIG, &data, 1);
 	if(ret) return ADDIDX(ret, 8);
 	data &= ~0x18;			// Clear AFS bits [4:3]
-	data |= AFS_4G << 3;	// Set full scale range for the accelerometer
+	data |= AFS_2G << 3;	// Set full scale range for the accelerometer
 	ret = TWI_WriteReg(MPU9250_ADDRESS, ACCEL_CONFIG, &data, 1);	// [I2C_SLV3_REG]
 	if(ret) return ADDIDX(ret, 8);
 	

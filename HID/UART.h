@@ -11,8 +11,14 @@
 
 #include <avr/io.h>
 
-#define START_CHAR	0x53 // 'S'
-#define END_CHAR	0x45 // 'E'
+#define RXUART_BUFF_SIZE	60
+
+#define FRD_READY		(1<<0)
+#define FRD_READ		(1<<1)
+#define FRD_SEND		(1<<2)
+
+extern volatile uint8_t flagReportData;	// FRD
+extern volatile uint8_t rxUART[RXUART_BUFF_SIZE];
 
 
 void UART_INIT(int baud);
