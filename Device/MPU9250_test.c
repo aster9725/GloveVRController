@@ -16,7 +16,6 @@
 #include "mpu9250.h"
 #include "base85.h"
 
-
 float   gyroBias[3] = {0.96, -0.21, 0.12}, accelBias[3] = {0.00299, -0.00916, 0.00952};
 float   magBias[3] = {71.04, 122.43, -36.90}, magScale[3]  = {1.01, 1.03, 0.96};
 
@@ -37,12 +36,15 @@ float   magBias[3] = {71.04, 122.43, -36.90}, magScale[3]  = {1.01, 1.03, 0.96};
 #define FORM_CSV	"%+010.4f,%+010.4f,%+010.4f,"	\
 					"%+010.4f,%+010.4f,%+010.4f,"	\
 					"%+010.4f,%+010.4f,%+010.4f,"	\
-					"%+010.4f,%+010.4f,%+010.4f,%+010.4f.\r\n"
+					"%+010.4f,%+010.4f,%+010.4f,%+010.4f,,\r\n"
 					
 #define FORM_SERIAL	"%+010.4f    %+010.4f    %+010.4f  |  "	\
 					"%+010.4f    %+010.4f    %+010.4f  |  "	\
 					"%+010.4f    %+010.4f    %+010.4f  |  "	\
 					"%+010.4f    %+010.4f    %+010.4f    %+010.4f\r\n"
+					
+#define FORM_FREEIMU	"%+010.4f\t%+010.4f\t%+010.4f\t"	\
+						"%+010.4f\t%+010.4f\t%+010.4f"		
 
 
 volatile uint16_t timer0_millis = 0;
@@ -64,19 +66,20 @@ void TIMER0_INIT();
 int main()
 {  
 	uint8_t i = 0;
+	uint8_t i2cReadRtyCnt = 0;
 	uint16_t ret = 0;
 	unsigned long timeStampMPU9250 = 0;
 	
 	float swap;
 	uint8_t mpuData[19] = {0,};
 	int16_t raw_a[3], raw_g[3], raw_m[3];
-	volatile SENS_DATA_T sdt = {0,};//, sdt2;
+	SENS_DATA_T sdt = {0,};//, sdt2;
 
 	
 	uint8_t reportDataBuffer[62] = { '[', }; // 2 more space for Start( [ ) / End( ] )
 	
 #ifdef _DEBUG
-	float quaternion[4];
+	float quaternion[4] = {1.0f, };
 	char buffer[256];
 #endif
 	
@@ -84,7 +87,7 @@ int main()
 	sdt.flexData[4] = -5;
 	
 	//UART
-	UART_INIT(9600);
+	UART_INIT(115200);
 
 	//TWI(I2C)
 	TWI_INIT();
@@ -123,13 +126,20 @@ int main()
 	{
 		if(millis() - timeStampMPU9250 < 5)
 			continue;
+READ_RETRY:
 		timeStampMPU9250 = millis();
 		ret = readAll(&(mpuData[0]));
 		if(ret)
 		{
-			UART_printString("Read MPU 9250 Fail");
-			goto READ_FAIL;
+			if(i2cReadRtyCnt > 5)
+			{
+				UART_printString("\r\nRead MPU 9250 Fail");
+				goto READ_FAIL;
+			}
+			++i2cReadRtyCnt;
+			goto READ_RETRY;
 		}
+		i2cReadRtyCnt = 0;
 
 		for(i = 0; i < 3; i++)
 		{
@@ -168,7 +178,7 @@ int main()
 		sdt.mag[0] = swap;
 
 #ifdef _DEBUG
-		MahonyAHRSupdate(&(sdt.gyro[0]), &(sdt.acc[0]), &(sdt.mag[0]), &(quaternion[0]));
+		//MahonyAHRSupdate(&(sdt.gyro[0]), &(sdt.acc[0]), &(sdt.mag[0]), &(quaternion[0]));
 
 		sprintf(buffer, 
 			FORM_SERIAL,	// or FORM_CSV
@@ -176,14 +186,20 @@ int main()
 			sdt.gyro[0], sdt.gyro[1], sdt.gyro[2],
 			sdt.mag[0], sdt.mag[1], sdt.mag[2],
 			quaternion[0], quaternion[1], quaternion[2], quaternion[3]);
+			
+		//sprintf(buffer,
+			//FORM_FREEIMU,	// or FORM_CSV
+			//sdt.acc[0], sdt.acc[1], sdt.acc[2],
+			//sdt.mag[0], sdt.mag[1], sdt.mag[2]);
 
 		UART_printString(buffer);
-#endif
+#else
 
 		btob85(reportDataBuffer+1, (uint8_t*)&sdt, 46);
 		for(i = 0; reportDataBuffer[i] != ']'; ++i)
 			USART_Transmit(reportDataBuffer[i]);
 		USART_Transmit(']');
+#endif
 	} 
 READ_FAIL:
 CONNECT_FAIL:

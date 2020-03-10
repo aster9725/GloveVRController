@@ -15,6 +15,7 @@ public:
 	InputConverter()
 	{
 		convertData = { 0 };
+		convertData.qPos.w = 1.0f;
 	}
 	bool SetData(HID_DEVICE& asyncDevice);
 	PGLOVE_POSE_DATA_T GetPoseData() { return &convertData; }

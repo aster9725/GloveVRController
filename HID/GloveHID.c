@@ -61,7 +61,7 @@ void SetupHardware(void)
 	USB_Init();
 	
 	/* Serial Initialization */
-	UART_INIT(9600);
+	UART_INIT(115200);
 }
 
 /** Event handler for the USB_Connect event. This indicates that the device is enumerating via the status LEDs and
@@ -260,9 +260,10 @@ ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
 	if(pProbe < rxUART + RXUART_BUFF_SIZE)
 	{
 		*pProbe = data;
+		++pProbe;
 	}
 
-	++pProbe;
-	END_UART_ISR:
+	
+END_UART_ISR:
 	return;
 }

@@ -6,7 +6,7 @@
  */ 
 #include "UART.h"
 
-void UART_INIT(int baud)
+void UART_INIT(uint32_t baud)
 {
 	UCSR0A |= _BV(U2X0);
 	

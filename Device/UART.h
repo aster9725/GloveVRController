@@ -10,7 +10,7 @@
 #include <avr/io.h>
 #include <stdio.h>
 
-void UART_INIT(int baud);
+void UART_INIT(uint32_t baud);
 void USART_Transmit(uint8_t tx_data);
 void UART_printString(char *str);
 void USART_Transmit_int4(int data);

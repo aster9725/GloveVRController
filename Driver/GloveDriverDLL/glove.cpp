@@ -79,7 +79,7 @@ public:
 
 		m_pose.vecPosition[0] = 0.5;
 		m_pose.vecPosition[1] = -0.5;
-		m_pose.vecPosition[2] = -1.0;
+		m_pose.vecPosition[2] = -0.8;
 
 		PropertyContainerHandle_t props = VRProperties()->TrackedDeviceToPropertyContainer(m_id);
 		VRProperties()->SetStringProperty(props, Prop_SerialNumber_String, device_serial_number);
@@ -141,10 +141,11 @@ public:
 		m_pose.qRotation.y = d_pose->qPos.y;
 		m_pose.qRotation.z = d_pose->qPos.z;
 
-		/*m_pose.vecPosition[0] = d_pose->acc.x / sampleFreq;
+		/*
+		m_pose.vecPosition[0] = d_pose->acc.x / sampleFreq;
 		m_pose.vecPosition[1] = d_pose->acc.y / sampleFreq;
-		m_pose.vecPosition[2] = d_pose->acc.z / sampleFreq;*/
-
+		m_pose.vecPosition[2] = d_pose->acc.z / sampleFreq;
+		*/
 		VRServerDriverHost()->TrackedDevicePoseUpdated(m_id, m_pose, sizeof(DriverPose_t));
 	}
 
@@ -174,7 +175,7 @@ public:
 					if (gloveHID)
 					{
 						memcpy(gloveHID, (hidList + i), sizeof(HID_DEVICE));
-						//DriverLog("Dev] HID Device find VID.PID : %04x.%04x", gloveHID->Attributes.VendorID, gloveHID->Attributes.ProductID);
+						DriverLog("Dev] HID Device find VID.PID : %04x.%04x", gloveHID->Attributes.VendorID, gloveHID->Attributes.ProductID);
 					}
 					else
 						DriverLog("Dev] HID Device List memory allocation failed");
@@ -212,6 +213,7 @@ public:
 			if (completionEvent)
 			{
 				numReadsDone = 0;
+				DriverLog("Dev] Start TimeStamp");
 				while (m_active)
 				{
 					readResult = ReadOverlapped(&asyncDevice, completionEvent, &overlap);
@@ -237,16 +239,23 @@ public:
 
 							IC.SetData(asyncDevice);
 
+							//DriverLog("Dev] %+10.4lf, %+10.4lf, %+10.4lf",
+							//	IC.GetPoseData()->qPos.x,
+							//	IC.GetPoseData()->qPos.y,
+							//	IC.GetPoseData()->qPos.z);
+
 							m_frame_count++;
 							UpdateControllerPose();
 							UpdateHandSkeletonPoses();
+							if (m_frame_count % 500 == 0)
+								DriverLog("Dev] TimeStamp");
 						}
-						else
-							DriverLog("Dev] Driver fail to get single USB data object");
+						//else
+							//DriverLog("Dev] Driver fail to get single USB data object");
 					}
 					else
 					{
-						DriverLog("Dev] Read Device File Failed. Close & wait for device is connected");
+						//DriverLog("Dev] Read Device File Failed. Close & wait for device is connected");
 						CloseHidDevice(gloveHID);
 						free(gloveHID);
 						gloveHID = NULL;
