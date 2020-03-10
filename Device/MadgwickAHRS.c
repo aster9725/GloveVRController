@@ -145,8 +145,8 @@ void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float 
 
 	sprintf(again, "%10.5f %10.5f %10.5f %10.5f",q0, q1, q2, q3 );
 	UART_printString(again);
-	USART_Transmit('\r\n');
-	//USART_Transmit('\n');
+	UART_Transmit('\r\n');
+	//UART_Transmit('\n');
 
 }
 

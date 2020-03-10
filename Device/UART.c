@@ -5,6 +5,11 @@
  *  Author: bitcamp
  */ 
 #include "UART.h"
+#include <avr/interrupt.h>
+
+#define SIZE_UART_BUFFER		255
+static volatile uint8_t txUARTBuffer[SIZE_UART_BUFFER] = {0, };
+static volatile uint8_t idxStart, idxEnd;
 
 void UART_INIT(uint32_t baud)
 {
@@ -12,49 +17,44 @@ void UART_INIT(uint32_t baud)
 	
 	UBRR0H = 0x00;
 	UBRR0L = F_CPU / 8 / baud - 1;
-	//UBRR0L = 19;	// test for 100000 baud
 	
 	UCSR0C |= 0x06;
 	
-	UCSR0B |= _BV(RXEN0);	// Enable RX
-	UCSR0B |= _BV(TXEN0);	// Enable TX
+	UCSR0B |= _BV(RXEN0);		// Enable RX
+	UCSR0B |= _BV(TXEN0);		// Enable TX
 	//UCSR0B |= _BV(RXCIE0);	// Enable ISR RX_Complete
+	
+	idxStart = 0;
+	idxEnd = 0;
 }
 
-void USART_Transmit(uint8_t tx_data)
+inline static void UART_Transmit(uint8_t tx_data)
 {
-	while( !(UCSR0A & (1 <<UDRE0)));
-	UDR0 = tx_data;
+	txUARTBuffer[idxEnd++] = tx_data;
+}
+
+void UART_printBin(uint8_t* pData, uint8_t cnt)
+{
+	uint8_t i = 0;
+
+	UCSR0B |= _BV(UDRIE0);	// Enable UDR0 Ready
+	for(i = 0; i < cnt; i++)
+		UART_Transmit(pData[i]);
+}
+
+void UART_printChar(uint8_t tx_data)
+{
+	UCSR0B |= _BV(UDRIE0);	// Enable UDR0 Ready
+	UART_Transmit(tx_data);
 }
 
 void UART_printString(char *str)
 {
+	UCSR0B |= _BV(UDRIE0);	// Enable UDR0 Ready
 	for(int i = 0; str[i];i++)
-	USART_Transmit(str[i]);
-}
-
-void USART_Transmit_int4(int data)
-{
-	if(data < 0)
 	{
-		data = -data;
-		USART_Transmit('-');
+		UART_Transmit(str[i]);
 	}
-	else
-	USART_Transmit(' ');
-
-	int temp = 0;
-	temp = data/10000;
-	USART_Transmit(temp+48);
-	temp = (data%10000)/1000;
-	USART_Transmit(temp+48);
-	temp = (data%1000)/100;
-	USART_Transmit(temp+48);
-	temp = (data%100)/10;
-	USART_Transmit(temp+48);
-	temp = data%10;
-	USART_Transmit(temp+48);
-	
 }
 
 void UART_printUINT(uint32_t n)
@@ -71,17 +71,21 @@ void UART_printUINT(uint32_t n)
 		}
 		i--;
 	}
-	
+	UCSR0B |= _BV(UDRIE0);	// Enable UDR0 Ready
 	for(; i >= 0; i--)
-	USART_Transmit(str[i]);
+	{
+		UART_Transmit(str[i]);
+	}
 }
 
-void UART_EncodeAscii85(uint8_t* data, uint8_t cnt)
+ISR(USART_UDRE_vect)
 {
-	
-}
-
-void UART_DecodeAscii85(uint8_t* data, uint8_t cnt)
-{
-	
+	if(idxStart != idxEnd)
+	{
+		UDR0 = txUARTBuffer[idxStart++];
+	}
+	else
+	{
+		UCSR0B &= ~_BV(UDRIE0);	// Disable UDR0 Ready
+	}
 }

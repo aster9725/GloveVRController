@@ -464,7 +464,7 @@ uint8_t readGyro(uint8_t* data)
 			 return 1;	// Data read failed
 		 }
 		 else
-		 return 2;	// Data not ready
+			return 4;	// Data not ready
 	 }
 	 
 	return 0;
@@ -489,36 +489,29 @@ uint8_t readMag(uint8_t* data)
 			else
 			{
 				if(data[6] & 0x08)
-					return 3;	// Data overflowed. data need to be discard
+					return 1;	// Data overflowed. data need to be discard
 			}
 		}
 		else
-			return 2;	// Data Not Ready
-		
-		for(ret = 0; ret < 6; ret+=2)
-		{
-			swaper = data[ret];
-			data[ret] = data[ret+1];
-			data[ret+1] = swaper;
-		}
+			return 8;	// Data Not Ready
 	}
 	return 0;	// Data Successfully read
 }
 
 uint8_t readAll(uint8_t* data)
 {
-	uint8_t ret;
-	ret = readACC(&(data[0]));
+	uint8_t ret = 0;
+	ret |= readACC(&(data[0]));
 	if(ret)
-		return ret | 0x10;
+		ret |= 0x10;
 
-	ret = readGyro(&(data[6]));
+	ret |= readGyro(&(data[6]));
 	if(ret)
-		return ret | 0x20;
+		ret |= 0x20;
 		
-	ret = readMag(&(data[12]));
+	ret |= readMag(&(data[12]));
 	if(ret)
-		return ret | 0x40;
+		ret |= 0x40;
 
-	return 0;
+	return ret;
 }

@@ -1,15 +1,11 @@
-
-
-
 #define F_CPU 16000000UL
 
-#define FS_SEL 16.384
-
-#include<avr/io.h> 
-#include<avr/interrupt.h>
-#include<util/delay.h>
-#include<math.h>
+#include <avr/io.h> 
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#include <math.h>
 #include <stdio.h>
+
 //#include "MadgwickAHRS.h"
 #include "MahonyAHRS.h"
 #include "UART.h"
@@ -62,29 +58,28 @@ inline uint16_t millis();
 void TIMER0_INIT();
 
 
-
 int main()
 {  
 	uint8_t i = 0;
 	uint8_t i2cReadRtyCnt = 0;
 	uint16_t ret = 0;
-	unsigned long timeStampMPU9250 = 0;
+	volatile uint16_t timeStampMPU9250 = 0, curtime = 0;
 	
 	float swap;
 	uint8_t mpuData[19] = {0,};
 	int16_t raw_a[3], raw_g[3], raw_m[3];
-	SENS_DATA_T sdt = {0,};//, sdt2;
+	SENS_DATA_T sdt = {0,};
 
-	
+	sdt.encData[4] = 5;
+	sdt.flexData[4] = 5;
+
 	uint8_t reportDataBuffer[62] = { '[', }; // 2 more space for Start( [ ) / End( ] )
+	reportDataBuffer[61] = ']';
 	
 #ifdef _DEBUG
 	float quaternion[4] = {1.0f, };
 	char buffer[256];
 #endif
-	
-	sdt.encData[4] = 5;
-	sdt.flexData[4] = -5;
 	
 	//UART
 	UART_INIT(115200);
@@ -124,12 +119,13 @@ int main()
 
 	while(1)
 	{
-		if(millis() - timeStampMPU9250 < 5)
+		curtime = millis();
+		if(curtime < timeStampMPU9250 + 10)
 			continue;
+		timeStampMPU9250 = curtime;
 READ_RETRY:
-		timeStampMPU9250 = millis();
 		ret = readAll(&(mpuData[0]));
-		if(ret)
+		if(ret & 0x01)
 		{
 			if(i2cReadRtyCnt > 5)
 			{
@@ -137,6 +133,9 @@ READ_RETRY:
 				goto READ_FAIL;
 			}
 			++i2cReadRtyCnt;
+			UART_printString("\r\nret: ");
+			UART_printUINT(ret);
+			UART_printString("\r\n");
 			goto READ_RETRY;
 		}
 		i2cReadRtyCnt = 0;
@@ -148,34 +147,57 @@ READ_RETRY:
 			raw_m[i] = ((int16_t)mpuData[i*2 + 12] << 8) | mpuData[i*2 + 12 + 1];
 		}
 		
-		sdt.acc[0] = (float)raw_a[0] * A_RES - accelBias[0];
-		sdt.acc[1] = (float)raw_a[1] * A_RES - accelBias[1];
-		sdt.acc[2] = (float)raw_a[2] * A_RES - accelBias[2];
+		if(!(ret & 0x12))
+		{
+			sdt.acc[0] = (float)raw_a[0] * A_RES - accelBias[0];
+			sdt.acc[1] = (float)raw_a[1] * A_RES - accelBias[1];
+			sdt.acc[2] = (float)raw_a[2] * A_RES - accelBias[2];
+			
+			sdt.acc[0] = 0 - sdt.acc[0];
+		}
+		//else if(ret & 0x12)
+			//UART_printString("ACC Not Ready\r\n");
 		
-		sdt.gyro[0] = (float)raw_g[0] * G_RES;
-		sdt.gyro[1] = (float)raw_g[1] * G_RES;
-		sdt.gyro[2] = (float)raw_g[2] * G_RES;
+		if(!(ret & 0x24))
+		{
+			sdt.gyro[0] = (float)raw_g[0] * G_RES;
+			sdt.gyro[1] = (float)raw_g[1] * G_RES;
+			sdt.gyro[2] = (float)raw_g[2] * G_RES;
+			
+			sdt.gyro[0] = sdt.gyro[0] * (3.141592f / 180.0f);
+			sdt.gyro[1] = sdt.gyro[1] * (3.141592f / 180.0f);
+			sdt.gyro[2] = sdt.gyro[2] * (3.141592f / 180.0f);
+		}
+		//else  if(ret & 0x24)
+			//UART_printString("GYRO Not Ready\r\n");
 		
-		sdt.mag[0] = (float)raw_m[0] * M_RES - magBias[0];
-		sdt.mag[1] = (float)raw_m[1] * M_RES - magBias[1];
-		sdt.mag[2] = (float)raw_m[2] * M_RES - magBias[2];
-		
-		sdt.mag[0] *= magScale[0];
-		sdt.mag[1] *= magScale[1];
-		sdt.mag[2] *= magScale[2];
+		if(!(ret & 0x48))
+		{
+			sdt.mag[0] = (float)raw_m[0] * M_RES - magBias[0];
+			sdt.mag[1] = (float)raw_m[1] * M_RES - magBias[1];
+			sdt.mag[2] = (float)raw_m[2] * M_RES - magBias[2];
+			
+			sdt.mag[0] *= magScale[0];
+			sdt.mag[1] *= magScale[1];
+			sdt.mag[2] *= magScale[2];
 
-		sdt.acc[0] = 0 - sdt.acc[0];
+			// Change magnetometer axis direction to fit acc/gyro axis
+			// See MPU9250 data sheet's assembly part
+			swap = sdt.mag[1];
+			sdt.mag[1] = sdt.mag[0];
+			sdt.mag[2] = 0.0f - sdt.mag[2];
+			sdt.mag[0] = swap;
+		}
+		//else  if(ret & 0x48)
+			//UART_printString("MAG Not Ready\r\n");
 		
-		sdt.gyro[0] = sdt.gyro[0] * (3.141592f/180.0f);
-		sdt.gyro[1] = sdt.gyro[1] * (3.141592f/180.0f);
-		sdt.gyro[2] = sdt.gyro[2] * (3.141592f/180.0f);
+		//Set Encoder & Flex
+		for(i = 0; i < 5; i++)
+		{
+			sdt.encData[i]++;
+			sdt.flexData[i]++;
+		}
 		
-		// Change magnetometer axis direction to fit acc/gyro axis
-		// See MPU9250 data sheet's assembly part
-		swap = sdt.mag[1];
-		sdt.mag[1] = sdt.mag[0];
-		sdt.mag[2] = 0.0f - sdt.mag[2];
-		sdt.mag[0] = swap;
 
 #ifdef _DEBUG
 		//MahonyAHRSupdate(&(sdt.gyro[0]), &(sdt.acc[0]), &(sdt.mag[0]), &(quaternion[0]));
@@ -186,19 +208,13 @@ READ_RETRY:
 			sdt.gyro[0], sdt.gyro[1], sdt.gyro[2],
 			sdt.mag[0], sdt.mag[1], sdt.mag[2],
 			quaternion[0], quaternion[1], quaternion[2], quaternion[3]);
-			
-		//sprintf(buffer,
-			//FORM_FREEIMU,	// or FORM_CSV
-			//sdt.acc[0], sdt.acc[1], sdt.acc[2],
-			//sdt.mag[0], sdt.mag[1], sdt.mag[2]);
 
 		UART_printString(buffer);
 #else
 
 		btob85(reportDataBuffer+1, (uint8_t*)&sdt, 46);
-		for(i = 0; reportDataBuffer[i] != ']'; ++i)
-			USART_Transmit(reportDataBuffer[i]);
-		USART_Transmit(']');
+		UART_printBin(reportDataBuffer, 62);
+
 #endif
 	} 
 READ_FAIL:
@@ -240,3 +256,4 @@ ISR(TIMER0_OVF_vect)
 	timer0_millis = m;
 	timer0_micros = f;
 }
+
