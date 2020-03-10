@@ -31,14 +31,9 @@
 
 #include "GloveHID.h"
 #include "UART.h"
+#include "base85.h"
 
-#define FRD_READY		(1<<0)
-#define FRD_REPORTED	(1<<1)
-#define FRD_DIRTY		(1<<2)
-
-volatile uint8_t flagReportData = 0;	// FRD
 volatile USB_GloveReport_Data_t gGloveReportData = {0, };
-volatile uint8_t data;
 
 int main(void)
 {
@@ -51,55 +46,6 @@ int main(void)
 		HID_Task();
 		USB_USBTask();
 	}
-}
-
-ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
-{
-	volatile static uint8_t read_byte_cnt = 0;
-	volatile static uint16_t* pXYZ = (uint16_t*)&(gGloveReportData.accX);
-	volatile static uint8_t* pEF = (uint8_t*)&(gGloveReportData.enc_index);
-	data = UDR1;
-	if (data == START_CHAR)
-	{
-		flagReportData &= ~(FRD_DIRTY);
-		flagReportData &= ~(FRD_READY);
-		pXYZ = (uint16_t*)&(gGloveReportData.accX);
-		pEF = (uint8_t*)&(gGloveReportData.enc_index);
-		read_byte_cnt = 0;
-		return;
-	}
-	else if(data == END_CHAR)
-	{
-		if(read_byte_cnt == sizeof(USB_GloveReport_Data_t)){
-			flagReportData &= ~(FRD_DIRTY);
-			flagReportData |= FRD_READY;
-		}
-		else {
-			flagReportData |= FRD_DIRTY;
-		}
-		return;
-	}
-	
-	if(flagReportData & FRD_DIRTY)
-		return;
-	if(pXYZ < &(gGloveReportData.enc_index))
-	{
-		if(read_byte_cnt%2)
-		{
-			*pXYZ |= data;
-			++pXYZ;
-		}
-		else
-		*pXYZ = data<<8;
-	}
-	else
-	{
-		*pEF = data;
-		++pEF;
-	}
-
-	++read_byte_cnt;
-
 }
 
 void SetupHardware(void)
@@ -115,7 +61,7 @@ void SetupHardware(void)
 	USB_Init();
 	
 	/* Serial Initialization */
-	UART_INIT(9600);
+	UART_INIT(115200);
 }
 
 /** Event handler for the USB_Connect event. This indicates that the device is enumerating via the status LEDs and
@@ -204,21 +150,22 @@ void ProcessGenericHIDReport(uint8_t* DataArray)
 bool GetNextReport(USB_GloveReport_Data_t* const ReportData)
 {
 	bool ret = false;
-	cli();
+
 	if(flagReportData & FRD_READY)
 	{
 		ReportData->accX = gGloveReportData.accX;
-		ReportData->accY = gGloveReportData.accX;
-		ReportData->accZ = gGloveReportData.accX;
+		ReportData->accY = gGloveReportData.accY;
+		ReportData->accZ = gGloveReportData.accZ;
 		
 		ReportData->gyroX = gGloveReportData.gyroX;
 		ReportData->gyroY = gGloveReportData.gyroY;
 		ReportData->gyroZ = gGloveReportData.gyroZ;
 		
-		ReportData->geoX = gGloveReportData.geoX;
-		ReportData->geoY = gGloveReportData.geoY;
-		ReportData->geoZ = gGloveReportData.geoZ;
+		ReportData->magX = gGloveReportData.magX;
+		ReportData->magY = gGloveReportData.magY;
+		ReportData->magZ = gGloveReportData.magZ;
 		
+		ReportData->enc_thumb	= gGloveReportData.enc_thumb;
 		ReportData->enc_index	= gGloveReportData.enc_index;
 		ReportData->enc_middle	= gGloveReportData.enc_middle;
 		ReportData->enc_ring	= gGloveReportData.enc_ring;
@@ -230,10 +177,11 @@ bool GetNextReport(USB_GloveReport_Data_t* const ReportData)
 		ReportData->flex_ring	= gGloveReportData.flex_ring;
 		ReportData->flex_pinky	= gGloveReportData.flex_pinky;
 		
-		flagReportData &= ~(FRD_READY);
+		flagReportData &= ~FRD_READY;
+		flagReportData |= FRD_SEND;
 		ret = true;
 	}
-	sei();
+
 	return ret;
 }
 
@@ -286,3 +234,36 @@ void HID_Task(void)
 	}
 }
 
+ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
+{
+	
+	volatile static uint8_t* pProbe = rxUART;
+	volatile uint8_t data;
+	
+	data = UDR1;
+	
+	if (data == '[' && (flagReportData & FRD_SEND))
+	{
+		flagReportData &= ~FRD_SEND;
+		flagReportData |= FRD_READ;
+		pProbe = rxUART;
+		goto END_UART_ISR;
+	}
+	if(data == ']' && (flagReportData & FRD_READ))
+	{
+		flagReportData &= ~FRD_READ;
+		flagReportData |= FRD_READY;
+		b85tob((uint8_t*)&gGloveReportData, rxUART);
+		goto END_UART_ISR;
+	}
+	
+	if(pProbe < rxUART + RXUART_BUFF_SIZE)
+	{
+		*pProbe = data;
+		++pProbe;
+	}
+
+	
+END_UART_ISR:
+	return;
+}

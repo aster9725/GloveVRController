@@ -25,6 +25,7 @@
     <ClCompile Include="hid.c" />
     <ClCompile Include="InputConverter.cpp" />
     <ClCompile Include="MadgwickAHRS.c" />
+    <ClCompile Include="MahonyAHRS.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bones.h" />
@@ -33,6 +34,7 @@
     <ClInclude Include="hid.h" />
     <ClInclude Include="InputConverter.h" />
     <ClInclude Include="MadgwickAHRS.h" />
+    <ClInclude Include="MahonyAHRS.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -67,7 +69,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>WindowsApplicationForDrivers10.0</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
     <SpectreMitigation>false</SpectreMitigation>

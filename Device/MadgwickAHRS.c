@@ -27,7 +27,7 @@
 //---------------------------------------------------------------------------------------------------
 // Definitions
 
-#define sampleFreq	512.0f		// sample frequency in Hz
+/*#define sampleFreq	512.0f		// sample frequency in Hz
 #define betaDef		0.1f		// 2 * proportional gain
 
 //---------------------------------------------------------------------------------------------------
@@ -143,10 +143,10 @@ void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float 
 	
 	char again[30];
 
-	sprintf(again, "%f,	%f,	%f,	%f",q0, q1, q2, q3 );
+	sprintf(again, "%10.5f %10.5f %10.5f %10.5f",q0, q1, q2, q3 );
 	UART_printString(again);
-	USART_Transmit('\r');
-	USART_Transmit('\n');
+	UART_Transmit('\r\n');
+	//UART_Transmit('\n');
 
 }
 
@@ -233,7 +233,7 @@ float invSqrt(float x) {
 	y = *(float*)&i;
 	y = y * (1.5f - (halfx * y * y));
 	return y;
-}
+}*/
 
 //====================================================================================================
 // END OF CODE

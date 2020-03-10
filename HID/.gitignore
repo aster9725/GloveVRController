@@ -6,3 +6,5 @@
 *.map
 *.sym
 *.cproj
+obj/
+.vs/

@@ -7,13 +7,11 @@
 
 #define F_CPU 16000000UL
 
-#include<avr/io.h>
-#include<avr/interrupt.h>
-#include<util/delay.h>
-#include<math.h>
-#include <stdio.h>
+#include <avr/io.h>
 
-void UART_INIT(void);
-void USART_Transmit(unsigned char tx_data);
+void UART_INIT(uint32_t baud);
+void UART_printBin(uint8_t* pData, uint8_t cnt);
+void UART_printChar(uint8_t tx_data);
 void UART_printString(char *str);
-void USART_Transmit_init4(int data);
+void UART_printUINT(uint32_t n);
+

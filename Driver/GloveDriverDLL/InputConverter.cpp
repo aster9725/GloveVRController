@@ -1,84 +1,39 @@
 #include "InputConverter.h"
+#include "driverlog.h"
+
 
 #define FS_SEL	131	// 250dgree/sec^2 constant
 #define CAL		10	// gyro sensor log
 
-
-void InputConverter::convertUnit()
+bool InputConverter::SetData(HID_DEVICE& asyncDevice)
 {
-	static bool isLogFull = false;
-	static UINT8 index = 0;
-	static GYRO	log[CAL] = { 0 };
-	GYRO base = { 0 };
-	UINT8 cnt = (isLogFull ? CAL : (index + 1));
+	//CHAR        szTempBuff[1024] = { 0 };
+	PHID_DATA pData = asyncDevice.InputData;
+	UINT        uLoop;
+	PFLOAT      pFloat = &(convertData.mag.z);
+	PINT8       p8 = &(convertData.enc.thumb);
 
-	refinedData.acc.x = (float)(rawData.acc.x / 8192.0f);// * 9.8;
-	refinedData.acc.y = (float)(rawData.acc.y / 8192.0f);// * 9.8;
-	refinedData.acc.z = (float)(rawData.acc.z / 8192.0f);// * 9.8;
-
-	refinedData.mag.x = (float)rawData.mag.x * ((rawData.asa.x + 128.000f) / 256.000f) - 380;
-	refinedData.mag.y = (float)rawData.mag.y * ((rawData.asa.y + 128.000f) / 256.000f) + 85;
-	refinedData.mag.z = (float)rawData.mag.z * ((rawData.asa.z + 128.000f) / 256.000f) - 325;
-
-	for (int i = 0; i < cnt; i++)
+	for (uLoop = 0; uLoop < asyncDevice.InputDataLength; uLoop++)
 	{
-		base.x += log[i].x;
-		base.y += log[i].y;
-		base.z += log[i].z;
+		//ReportToString(pData, szTempBuff, sizeof(szTempBuff));
+		//DriverLog("Dev] %s", szTempBuff);
+
+		if (uLoop < 9) {
+			//DriverLog("Dev] %d", pData->ValueData.Usage);
+			memcpy(pFloat, &(pData->ValueData.Value), 4);
+			--pFloat;
+		}
+		else {
+			//DriverLog("Dev] %d", pData->ValueData.Usage);
+			memcpy(p8, &(pData->ValueData.Value), 1);
+			++p8;
+		}
+
+		pData++;
 	}
 
-	log[index].x = (float)rawData.gyro.x;
-	log[index].y = (float)rawData.gyro.y;
-	log[index].z = (float)rawData.gyro.z;
-
-	base.x /= cnt;
-	base.y /= cnt;
-	base.z /= cnt;
-
-	refinedData.gyro.x = (refinedData.gyro.x - base.x) / FS_SEL;
-	refinedData.gyro.y = (refinedData.gyro.y - base.y) / FS_SEL;
-	refinedData.gyro.z = (refinedData.gyro.z - base.z) / FS_SEL;
-
-	refinedData.gyro.x *= 0.0174533f;
-	refinedData.gyro.y *= 0.0174533f;
-	refinedData.gyro.z *= 0.0174533f;
-
-	index = (index + 1) % CAL;
-	if (!index && !isLogFull)
-		isLogFull = true;
-}
-
-bool InputConverter::SetRawData(USB_REPORT_DATA_T& src)
-{
-	rawData.acc.x = -src.acc.z;
-	rawData.acc.y = src.acc.y;
-	rawData.acc.z = src.acc.x;
-
-	rawData.gyro.x = -src.gyro.z;
-	rawData.gyro.y = src.gyro.y;
-	rawData.gyro.z = src.gyro.x;
-
-	rawData.mag.x = -src.mag.z;
-	rawData.mag.y = src.mag.y;
-	rawData.mag.z = src.mag.x;
-
-	rawData.enc = src.enc;
-
-	rawData.flex = src.flex;
-
-	/*rawData.enc.thumb	= src.enc.thumb;
-	rawData.enc.index	= src.enc.index;
-	rawData.enc.middle	= src.enc.middle;
-	rawData.enc.ring	= src.enc.ring;
-	rawData.enc.pinky	= src.enc.pinky;
-
-	rawData.flex.thumb	= src.flex.thumb;
-	rawData.flex.index	= src.flex.index;
-	rawData.flex.middle	= src.flex.middle;
-	rawData.flex.ring	= src.flex.ring;
-	rawData.flex.pinky	= src.flex.pinky;*/
-
-	this->convertUnit();
+	//MadgwickAHRSupdate(&convertData);
+	MahonyAHRSupdate(&convertData);
 
 	return true;
 }

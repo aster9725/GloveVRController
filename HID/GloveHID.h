@@ -52,18 +52,19 @@
 	/* Data Structure */
 	typedef struct
 	{
-		int16_t accX;
-		int16_t accY;
-		int16_t accZ;
+		float accX;
+		float accY;
+		float accZ;
 		
-		int16_t gyroX;
-		int16_t gyroY;
-		int16_t gyroZ;
+		float gyroX;
+		float gyroY;
+		float gyroZ;
 		
-		int16_t geoX;
-		int16_t geoY;
-		int16_t geoZ;
+		float magX;
+		float magY;
+		float magZ;
 		
+		int8_t enc_thumb;
 		int8_t enc_index;
 		int8_t enc_middle;
 		int8_t enc_ring;

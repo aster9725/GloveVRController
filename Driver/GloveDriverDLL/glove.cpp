@@ -1,10 +1,7 @@
 #include "openvr_driver.h"
 #include "bones.h"
 #include "driverlog.h"
-<<<<<<< HEAD
-=======
 #include "InputConverter.h"
->>>>>>> driver
 #include <thread>
 #include <atomic>
 #include <chrono>
@@ -13,10 +10,10 @@
 using namespace vr;
 using namespace std;
 
-extern "C" {
-#include "hid.h"
-#include "MadgwickAHRS.h"
-}
+//extern "C" {
+//#include "hid.h"
+//#include "MadgwickAHRS.h"
+//}
 
 #define DEVICE_NAME "glove"
 #define DEVICE_VID  0x1991
@@ -25,7 +22,7 @@ extern "C" {
 static LIST               PhysicalDeviceList;
 
 static const char* device_manufacturer = "sysglove";
-static const char *device_controller_type = DEVICE_NAME;
+static const char* device_controller_type = DEVICE_NAME;
 static const char* device_model_number = DEVICE_NAME "1";
 static const char* device_serial_number = DEVICE_NAME "SN0";
 static const char* device_render_model_name = "{" DEVICE_NAME "}/rendermodels/" DEVICE_NAME;
@@ -82,7 +79,7 @@ public:
 
 		m_pose.vecPosition[0] = 0.5;
 		m_pose.vecPosition[1] = -0.5;
-		m_pose.vecPosition[2] = -1.0;
+		m_pose.vecPosition[2] = -0.8;
 
 		PropertyContainerHandle_t props = VRProperties()->TrackedDeviceToPropertyContainer(m_id);
 		VRProperties()->SetStringProperty(props, Prop_SerialNumber_String, device_serial_number);
@@ -107,7 +104,7 @@ public:
 		m_active = true;
 		m_pose_thread = std::thread(&RightHandTest::UpdatePoseThread, this);
 		
-		DriverLog("Dev] Glove Contorller Activate Start");
+		//DriverLog("Dev] Glove Contorller Activate Start");
 		
 		return VRInitError_None;
 	}
@@ -118,7 +115,7 @@ public:
 		{
 			m_active = false;
 			m_pose_thread.join();
-			DriverLog("Dev] Glove Contorller Deactivated");
+			//DriverLog("Dev] Glove Contorller Deactivated");
 		}
 		CloseHidDevice(&asyncDevice);
 		free(gloveHID);
@@ -127,7 +124,7 @@ public:
 	void EnterStandby() override {}
 	void *GetComponent(const char *pchComponentNameAndVersion) override
 	{
-		DriverLog("GetComponent called for %s", pchComponentNameAndVersion);
+		//DriverLog("GetComponent called for %s", pchComponentNameAndVersion);
 		return nullptr;
 	}
 
@@ -138,12 +135,17 @@ public:
 	// in this case we just offset from the hmd
 	void UpdateControllerPose()
 	{
-		static int index = 0;
-		m_pose.qRotation.w = IC.GetPoseData()->qPos.w;
-		m_pose.qRotation.x = IC.GetPoseData()->qPos.x;
-		m_pose.qRotation.y = IC.GetPoseData()->qPos.y;
-		m_pose.qRotation.z = IC.GetPoseData()->qPos.z;
+		PGLOVE_POSE_DATA_T d_pose = IC.GetPoseData();
+		m_pose.qRotation.w = d_pose->qPos.w;
+		m_pose.qRotation.x = d_pose->qPos.x;
+		m_pose.qRotation.y = d_pose->qPos.y;
+		m_pose.qRotation.z = d_pose->qPos.z;
 
+		/*
+		m_pose.vecPosition[0] = d_pose->acc.x / sampleFreq;
+		m_pose.vecPosition[1] = d_pose->acc.y / sampleFreq;
+		m_pose.vecPosition[2] = d_pose->acc.z / sampleFreq;
+		*/
 		VRServerDriverHost()->TrackedDevicePoseUpdated(m_id, m_pose, sizeof(DriverPose_t));
 	}
 
@@ -162,7 +164,8 @@ public:
 		ULONG numDevices;
 		BOOLEAN readAsync;
 
-		if (FindKnownHidDevices(&hidList, &numDevices) == TRUE)
+	WAIT_FOR_CONNECT:
+		while (FindKnownHidDevices(&hidList, &numDevices) == TRUE)
 		{
 			for (ULONG i = 0; i <= numDevices; i++)
 			{
@@ -178,9 +181,11 @@ public:
 						DriverLog("Dev] HID Device List memory allocation failed");
 				}
 			}
+			if (gloveHID != NULL)
+				break;
+			DriverLog("Dev] HID Devices Not Found. Sleep 500ms");
+			Sleep(500);
 		}
-		else
-			DriverLog("Dev] HID Devices Not Found");
 
 		if (hidList)
 			free(hidList);
@@ -189,34 +194,31 @@ public:
 		{
 			readAsync = OpenHidDevice(gloveHID->DevicePath, TRUE, FALSE, TRUE, FALSE, &asyncDevice);
 			if (readAsync)
-				//DriverLog("Dev] Open Device Async Success");
+				DriverLog("Dev] Open Device Async Success");
 			else {
 				DriverLog("Dev] Open Device Async Failed");
 				return;
 			}
 
-			HANDLE  completionEvent;
+			HANDLE  completionEvent = NULL;
 			BOOL    readResult;
 			DWORD   waitStatus;
 			ULONG   numReadsDone;
 			OVERLAPPED overlap;
 			DWORD      bytesTransferred;
-			USB_REPORT_DATA_T tmpRawData;
 
-			completionEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+			if(!completionEvent)
+				completionEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 			if (completionEvent)
 			{
-				//DriverLog("Dev] Create CompletionEvent Success");
-
 				numReadsDone = 0;
-				
+				DriverLog("Dev] Start TimeStamp");
 				while (m_active)
 				{
 					readResult = ReadOverlapped(&asyncDevice, completionEvent, &overlap);
 					if (readResult)
 					{
-						//DriverLog("Dev] Read Device File Success");
 						waitStatus = WaitForSingleObject(completionEvent, 1000);
 						if (WAIT_OBJECT_0 == waitStatus)
 						{
@@ -233,84 +235,31 @@ public:
 								HidP_Input,
 								asyncDevice.InputData,
 								asyncDevice.InputDataLength,
-								asyncDevice.Ppd);
+								asyncDevice.Ppd);						
 
-							//CHAR        szTempBuff[1024] = { 0 };
-							PHID_DATA   pData = asyncDevice.InputData;
-							UINT        uLoop;
-							PINT16      p16 = &(tmpRawData.acc.x);
-							PINT8       p8 = &(tmpRawData.enc.index);   // We don't have thumb encoder now
-							for (uLoop = 0; uLoop < asyncDevice.InputDataLength; uLoop++)
-							{
-								//ReportToString(pData, szTempBuff, sizeof(szTempBuff));
-								//DriverLog("Dev] %s", szTempBuff);
-								if (uLoop < 9) {
-									*p16 = (INT16)(pData->ValueData.Value);
-									++p16;
-								}
-								else {
-									*p8 = (INT8)(pData->ValueData.Value);
-									++p8;
-								}
+							IC.SetData(asyncDevice);
 
-								pData++;
-							}
-							//DriverLog("Dev] RAWACC_X : %d", tmpRawData.acc.x);
-							//DriverLog("Dev] RAWACC_Y : %d", tmpRawData.acc.y);
-							//DriverLog("Dev] RAWACC_Z : %d", tmpRawData.acc.y);
-
-							//DriverLog("Dev] RAWGYRO_X : %d", tmpRawData.gyro.x);
-							//DriverLog("Dev] RAWGYRO_Y : %d", tmpRawData.gyro.y);
-							//DriverLog("Dev] RAWGYRO_Z : %d", tmpRawData.gyro.y);
-
-							//DriverLog("Dev] RAWMAG_X : %d", tmpRawData.mag.x);
-							//DriverLog("Dev] RAWMAG_Y : %d", tmpRawData.mag.y);
-							//DriverLog("Dev] RAWMAG_Z : %d", tmpRawData.mag.y);
-
-							//DriverLog("Dev] ENC_THUMB  : %d", tmpRawData.enc.thumb);
-							//DriverLog("Dev] ENC_INDEX  : %d", tmpRawData.enc.index);
-							//DriverLog("Dev] ENC_MIDDLE : %d", tmpRawData.enc.middle);
-							//DriverLog("Dev] ENC_RING   : %d", tmpRawData.enc.ring);
-							//DriverLog("Dev] ENC_PINKY  : %d", tmpRawData.enc.pinky);
-
-							//DriverLog("Dev] FLEX_THUMB  : %d", tmpRawData.flex.thumb);
-							//DriverLog("Dev] FLEX_INDEX  : %d", tmpRawData.flex.index);
-							//DriverLog("Dev] FLEX_MIDDLE : %d", tmpRawData.flex.middle);
-							//DriverLog("Dev] FLEX_RING   : %d", tmpRawData.flex.ring);
-							//DriverLog("Dev] FLEX_PINKY  : %d", tmpRawData.flex.pinky);
-
-							IC.SetRawData(tmpRawData);
-							MadgwickAHRSupdate(IC.GetPoseData());
-
-							PGLOVE_POSE_DATA_T pRefined = IC.GetPoseData();
-
-							//DriverLog("Dev] qPos_W : %lf", pRefined->qPos.w);
-							//DriverLog("Dev] qPos_X : %lf", pRefined->qPos.x);
-							//DriverLog("Dev] qPos_Y : %lf", pRefined->qPos.y);
-							//DriverLog("Dev] qPos_Z : %lf", pRefined->qPos.z);
-
-							//DriverLog("Dev] ACC_X : %lf", pRefined->acc.x);
-							//DriverLog("Dev] ACC_Y : %lf", pRefined->acc.y);
-							//DriverLog("Dev] ACC_Z : %lf", pRefined->acc.z);
-
-							//DriverLog("Dev] GYRO_X : %lf", pRefined->gyro.x);
-							//DriverLog("Dev] GYRO_Y : %lf", pRefined->gyro.y);
-							//DriverLog("Dev] GYRO_Z : %lf", pRefined->gyro.z);
-
-							//DriverLog("Dev] MAG_X : %lf", pRefined->mag.x);
-							//DriverLog("Dev] MAG_Y : %lf", pRefined->mag.y);
-							//DriverLog("Dev] MAG_Z : %lf", pRefined->mag.z);
+							//DriverLog("Dev] %+10.4lf, %+10.4lf, %+10.4lf",
+							//	IC.GetPoseData()->qPos.x,
+							//	IC.GetPoseData()->qPos.y,
+							//	IC.GetPoseData()->qPos.z);
 
 							m_frame_count++;
 							UpdateControllerPose();
 							UpdateHandSkeletonPoses();
+							if (m_frame_count % 500 == 0)
+								DriverLog("Dev] TimeStamp");
 						}
-						else
-							DriverLog("Dev] Driver fail to get single USB data object");
+						//else
+							//DriverLog("Dev] Driver fail to get single USB data object");
 					}
 					else
 					{
-						DriverLog("Dev] Read Device File Failed");
+						//DriverLog("Dev] Read Device File Failed. Close & wait for device is connected");
+						CloseHidDevice(gloveHID);
+						free(gloveHID);
+						gloveHID = NULL;
+						goto WAIT_FOR_CONNECT;
 					}
 				}
 			}

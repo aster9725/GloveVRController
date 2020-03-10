@@ -1,21 +1,23 @@
 #pragma once
 #include "glovedatatype.h"
 
+extern "C" {
+#include "hid.h"
+#include "MadgwickAHRS.h"
+#include "MahonyAHRS.h"
+}
+
 class InputConverter
 {
-	USB_REPORT_DATA_T	rawData;
-	GLOVE_POSE_DATA_T	refinedData;
-	void convertUnit();
+	GLOVE_POSE_DATA_T	convertData;
 
 public:
 	InputConverter()
 	{
-		rawData.asa.x = 128;
-		rawData.asa.y = 127;
-		rawData.asa.z = -129;
+		convertData = { 0 };
+		convertData.qPos.w = 1.0f;
 	}
-	bool SetRawData(USB_REPORT_DATA_T& src);
-	PUSB_REPORT_DATA_T GetRawData() { return &rawData; }
-	PGLOVE_POSE_DATA_T GetPoseData() { return &refinedData; }
+	bool SetData(HID_DEVICE& asyncDevice);
+	PGLOVE_POSE_DATA_T GetPoseData() { return &convertData; }
 };
 

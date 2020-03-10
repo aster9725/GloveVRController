@@ -25,12 +25,17 @@
 // Variable declaration
 
 extern volatile float beta;				// algorithm gain
-extern volatile float q0, q1, q2, q3;	// quaternion of sensor frame relative to auxiliary frame
+//extern volatile float q0, q1, q2, q3;	// quaternion of sensor frame relative to auxiliary frame
+
+//---------------------------------------------------------------------------------------------------
+// Definitions
+
+#define sampleFreq	500.0f		// sample frequency in Hz
 
 //---------------------------------------------------------------------------------------------------
 // Function declarations
 
-void MadgwickAHRSupdate(PGLOVE_POSE_DATA_T resultData);
+void MadgwickAHRSupdate(PGLOVE_POSE_DATA_T poseData);
 void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az);
 
 #endif
