@@ -11,7 +11,8 @@
 
 #include <avr/io.h>
 
-#define RXUART_BUFF_SIZE	60
+#define RXUART_BUFF_SIZE		64
+#define RXUART_BUFF_SIZE_MASK	0x3F
 
 #define FRD_READY		(1<<0)
 #define FRD_READ		(1<<1)

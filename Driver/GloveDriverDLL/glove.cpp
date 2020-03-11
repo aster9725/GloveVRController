@@ -175,10 +175,10 @@ public:
 					if (gloveHID)
 					{
 						memcpy(gloveHID, (hidList + i), sizeof(HID_DEVICE));
-						DriverLog("Dev] HID Device find VID.PID : %04x.%04x", gloveHID->Attributes.VendorID, gloveHID->Attributes.ProductID);
+						//DriverLog("Dev] HID Device find VID.PID : %04x.%04x", gloveHID->Attributes.VendorID, gloveHID->Attributes.ProductID);
 					}
-					else
-						DriverLog("Dev] HID Device List memory allocation failed");
+					/*else
+						DriverLog("Dev] HID Device List memory allocation failed");*/
 				}
 			}
 			if (gloveHID != NULL)
@@ -222,7 +222,6 @@ public:
 						waitStatus = WaitForSingleObject(completionEvent, 1000);
 						if (WAIT_OBJECT_0 == waitStatus)
 						{
-							//DriverLog("Dev] Driver successfully got single USB data object");
 							readResult = GetOverlappedResult(asyncDevice.HidDevice, &overlap, &bytesTransferred, TRUE);
 
 							if (!m_active)
@@ -239,16 +238,11 @@ public:
 
 							IC.SetData(asyncDevice);
 
-							//DriverLog("Dev] %+10.4lf, %+10.4lf, %+10.4lf",
-							//	IC.GetPoseData()->qPos.x,
-							//	IC.GetPoseData()->qPos.y,
-							//	IC.GetPoseData()->qPos.z);
-
 							m_frame_count++;
 							UpdateControllerPose();
 							UpdateHandSkeletonPoses();
-							if (m_frame_count % 500 == 0)
-								DriverLog("Dev] TimeStamp");
+							//if (m_frame_count % 500 == 0)
+							//	DriverLog("Dev] TimeStamp");
 						}
 						//else
 							//DriverLog("Dev] Driver fail to get single USB data object");

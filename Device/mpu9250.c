@@ -432,17 +432,17 @@ uint8_t readACC(uint8_t* data)
 	// Check Acc Data Ready
 	ret = TWI_ReadReg(MPU9250_ADDRESS, INT_STATUS, &(data[0]), 1);
 	if(ret)
-		return 1;	// Data read failed	
+		return ERR_DATA_READ_FAIL;	// Data read failed	
 	else
 	{
 		if(data[0] & 0x01)
 		{
 			ret = TWI_ReadReg(MPU9250_ADDRESS, ACCEL_XOUT_H, &(data[0]), 6);
 			if(ret)
-				return 1;	// Data read failed
+				return ERR_DATA_READ_FAIL;	// Data read failed
 		}
 		else
-			return 2;	// Data not ready
+			return ERR_DATA_NOT_READY(_ACC);	// Data not ready
 	}
 	
 	return 0;
@@ -454,17 +454,17 @@ uint8_t readGyro(uint8_t* data)
 	 // Check Acc Data Ready
 	 ret = TWI_ReadReg(MPU9250_ADDRESS, INT_STATUS, &(data[0]), 1);
 	 if(ret)
-	 return 1;	// Data read failed
+	 return ERR_DATA_READ_FAIL;	// Data read failed
 	 else
 	 {
 		 if(data[0] & 0x01)
 		 {
 			 ret = TWI_ReadReg(MPU9250_ADDRESS, GYRO_XOUT_H, &(data[0]), 6);
 			 if(ret)
-			 return 1;	// Data read failed
+			 return ERR_DATA_READ_FAIL;	// Data read failed
 		 }
 		 else
-			return 4;	// Data not ready
+			return ERR_DATA_NOT_READY(_GYRO);	// Data not ready
 	 }
 	 
 	return 0;
@@ -473,11 +473,11 @@ uint8_t readGyro(uint8_t* data)
 uint8_t readMag(uint8_t* data)
 {
 	uint16_t ret;
-	uint8_t swaper;
+	
 	// Check Mag Data Ready
 	ret = TWI_ReadReg(AK8963_ADDRESS, AK8963_ST1, &(data[0]), 1);
 	if(ret)
-		return 1;	// Data read failed
+		return ERR_DATA_READ_FAIL;	// Data read failed
 	else
 	{
 		if(data[0] & 0x01)
@@ -485,15 +485,15 @@ uint8_t readMag(uint8_t* data)
 			// Read to ST2
 			ret = TWI_ReadReg(AK8963_ADDRESS, AK8963_XOUT_L, &(data[0]), 7);
 			if(ret)
-				return 1;	// Data read failed
+				return ERR_DATA_READ_FAIL;	// Data read failed
 			else
 			{
 				if(data[6] & 0x08)
-					return 1;	// Data overflowed. data need to be discard
+					return ERR_DATA_OVERFLOW;	// Data overflowed. data need to be discard
 			}
 		}
 		else
-			return 8;	// Data Not Ready
+			return ERR_DATA_NOT_READY(_MAG);	// Data Not Ready
 	}
 	return 0;	// Data Successfully read
 }
@@ -503,15 +503,15 @@ uint8_t readAll(uint8_t* data)
 	uint8_t ret = 0;
 	ret |= readACC(&(data[0]));
 	if(ret)
-		ret |= 0x10;
+		ret |= ERR_ACC;
 
 	ret |= readGyro(&(data[6]));
 	if(ret)
-		ret |= 0x20;
+		ret |= ERR_GYRO;
 		
 	ret |= readMag(&(data[12]));
 	if(ret)
-		ret |= 0x40;
+		ret |= ERR_MAG;
 
 	return ret;
 }

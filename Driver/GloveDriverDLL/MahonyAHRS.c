@@ -20,8 +20,8 @@
 //---------------------------------------------------------------------------------------------------
 // Definitions
 
-#define twoKpDef	(2.0f * 1.0f)	// 2 * proportional gain
-#define twoKiDef	(2.0f * 0.0f)	// 2 * integral gain
+#define twoKpDef	(2.0f * 1.75f)	// 2 * proportional gain
+#define twoKiDef	(2.0f * 0.25f)	// 2 * integral gain
 
 //---------------------------------------------------------------------------------------------------
 // Variable definitions

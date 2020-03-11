@@ -40,7 +40,7 @@ int main(void)
 	SetupHardware();
 	
 	GlobalInterruptEnable();
-
+	
 	for (;;)
 	{
 		HID_Task();
@@ -153,30 +153,32 @@ bool GetNextReport(USB_GloveReport_Data_t* const ReportData)
 
 	if(flagReportData & FRD_READY)
 	{
-		ReportData->accX = gGloveReportData.accX;
-		ReportData->accY = gGloveReportData.accY;
-		ReportData->accZ = gGloveReportData.accZ;
-		
-		ReportData->gyroX = gGloveReportData.gyroX;
-		ReportData->gyroY = gGloveReportData.gyroY;
-		ReportData->gyroZ = gGloveReportData.gyroZ;
-		
-		ReportData->magX = gGloveReportData.magX;
-		ReportData->magY = gGloveReportData.magY;
-		ReportData->magZ = gGloveReportData.magZ;
-		
-		ReportData->enc_thumb	= gGloveReportData.enc_thumb;
-		ReportData->enc_index	= gGloveReportData.enc_index;
-		ReportData->enc_middle	= gGloveReportData.enc_middle;
-		ReportData->enc_ring	= gGloveReportData.enc_ring;
-		ReportData->enc_pinky	= gGloveReportData.enc_pinky;
-		
-		ReportData->flex_thumb	= gGloveReportData.flex_thumb;
-		ReportData->flex_index	= gGloveReportData.flex_index;
-		ReportData->flex_middle	= gGloveReportData.flex_middle;
-		ReportData->flex_ring	= gGloveReportData.flex_ring;
-		ReportData->flex_pinky	= gGloveReportData.flex_pinky;
-		
+		memcpy(ReportData, &gGloveReportData, sizeof(USB_GloveReport_Data_t));
+
+		//ReportData->accX = gGloveReportData.accX;
+		//ReportData->accY = gGloveReportData.accY;
+		//ReportData->accZ = gGloveReportData.accZ;
+//
+		//ReportData->gyroX = gGloveReportData.gyroX;
+		//ReportData->gyroY = gGloveReportData.gyroY;
+		//ReportData->gyroZ = gGloveReportData.gyroZ;
+//
+		//ReportData->magX = gGloveReportData.magX;
+		//ReportData->magY = gGloveReportData.magY;
+		//ReportData->magZ = gGloveReportData.magZ;
+//
+		//ReportData->enc_thumb   = gGloveReportData.enc_thumb;
+		//ReportData->enc_index   = gGloveReportData.enc_index;
+		//ReportData->enc_middle  = gGloveReportData.enc_middle;
+		//ReportData->enc_ring    = gGloveReportData.enc_ring;
+		//ReportData->enc_pinky   = gGloveReportData.enc_pinky;
+//
+		//ReportData->flex_thumb  = gGloveReportData.flex_thumb;
+		//ReportData->flex_index  = gGloveReportData.flex_index;
+		//ReportData->flex_middle = gGloveReportData.flex_middle;
+		//ReportData->flex_ring   = gGloveReportData.flex_ring;
+		//ReportData->flex_pinky  = gGloveReportData.flex_pinky;
+
 		flagReportData &= ~FRD_READY;
 		flagReportData |= FRD_SEND;
 		ret = true;
@@ -237,8 +239,9 @@ void HID_Task(void)
 ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
 {
 	
-	volatile static uint8_t* pProbe = rxUART;
-	volatile uint8_t data;
+	volatile static uint8_t* pRxProbe = rxUART, readCnt = 0;
+	static uint8_t* volatile pReportProbe = (uint8_t*)&gGloveReportData;
+	volatile uint8_t data = 0;
 	
 	data = UDR1;
 	
@@ -246,23 +249,31 @@ ISR(USART1_RX_vect)	// while(!(UCSR0A & (1<<RXC0)));
 	{
 		flagReportData &= ~FRD_SEND;
 		flagReportData |= FRD_READ;
-		pProbe = rxUART;
+		pRxProbe = rxUART;
+		pReportProbe = (uint8_t*)&gGloveReportData;
+		readCnt = 0;
 		goto END_UART_ISR;
 	}
 	if(data == ']' && (flagReportData & FRD_READ))
 	{
 		flagReportData &= ~FRD_READ;
 		flagReportData |= FRD_READY;
-		b85tob((uint8_t*)&gGloveReportData, rxUART);
 		goto END_UART_ISR;
 	}
 	
-	if(pProbe < rxUART + RXUART_BUFF_SIZE)
+	if((pRxProbe < rxUART + RXUART_BUFF_SIZE) && (flagReportData & FRD_READ))
 	{
-		*pProbe = data;
-		++pProbe;
-	}
+		*(pRxProbe++) = data;
 
+		if(++readCnt >= 5)
+		{
+			*pRxProbe = 255;	// to stop b85tob
+			b85tob(pReportProbe, pRxProbe - 5);
+			readCnt = 0;
+			pReportProbe += 4;
+		}
+		
+	}
 	
 END_UART_ISR:
 	return;

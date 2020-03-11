@@ -191,6 +191,18 @@
 //#define G_RES	0.0610351563f	// 2000.0 / 32768.0
 #define G_RES	0.0152587891f	// 500.0 / 32768.0
 
+#define ERR_ACC		0x10
+#define ERR_GYRO	0x20
+#define ERR_MAG		0x40
+
+#define _ACC	1
+#define _GYRO	2
+#define _MAG	3
+
+#define ERR_DATA_NOT_READY(n)	(0x01 << (n))	
+#define ERR_DATA_READ_FAIL		0x01
+#define ERR_DATA_OVERFLOW		0x01
+
 extern volatile float m_calibration[3];
 
 uint16_t MPU9250_init(float* a_bias, float* g_bias);

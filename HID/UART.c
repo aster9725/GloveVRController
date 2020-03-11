@@ -23,6 +23,8 @@ void UART_INIT(uint32_t baud)
 	UCSR1B |= _BV(RXEN1);	// Enable RX
 	UCSR1B |= _BV(TXEN1);	// Enable TX
 	UCSR1B |= _BV(RXCIE1);	// Enable ISR RX_Complete
+	
+	flagReportData = FRD_SEND;
 }
 
 unsigned char UART_receive(unsigned char block)
