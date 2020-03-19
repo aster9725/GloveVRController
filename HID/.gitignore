@@ -8,3 +8,8 @@
 *.cproj
 obj/
 .vs/
+Debug/
+Release/
+*.xml
+*.atsln
+*.cproj

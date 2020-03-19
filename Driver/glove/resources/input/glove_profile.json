@@ -17,25 +17,43 @@
     "/input/finger/index" : {
         "type" : "trigger",
 	"visibility" : "InputValueVisibility_AvailableButHidden",
-        "binding_image_point" : [ 56, 86 ]
+        "binding_image_point" : [ 40, 86 ]
     },
     "/input/finger/middle" : {
         "type" : "trigger",
 	"visibility" : "InputValueVisibility_AvailableButHidden",
-        "binding_image_point" : [ 56, 86 ]
+        "binding_image_point" : [ 50, 86 ]
     },
     "/input/finger/ring" : {
         "type" : "trigger",
 	"visibility" : "InputValueVisibility_AvailableButHidden",
-        "binding_image_point" : [ 56, 86 ]
+        "binding_image_point" : [ 60, 86 ]
     },
     "/input/finger/pinky" : {
         "type" : "trigger",
 	"visibility" : "InputValueVisibility_AvailableButHidden",
-        "binding_image_point" : [ 56, 86 ]
+        "binding_image_point" : [ 70, 86 ]
     },
     "/pose/raw" : {
         "type" : "pose",
+        "binding_image_point" : [ 5, 35 ]
+    },
+    "/pose/base" : {
+        "type" : "pose",
+        "binding_image_point" : [ 5, 136 ]
+    },
+    "/pose/handgrip" : {
+        "type" : "pose",
+        "binding_image_point" : [ 5, 95 ]
+    },
+    "/pose/tip" : {
+        "type" : "pose",
+        "binding_image_point" : [ 5, 35 ]
+    },
+    "/input/skeleton/left" : {
+        "type" : "skeleton",
+        "skeleton": "/skeleton/hand/left",
+        "side" : "left",
         "binding_image_point" : [ 5, 35 ]
     },
     "/input/skeleton/right" : {

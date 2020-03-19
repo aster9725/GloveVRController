@@ -27,23 +27,6 @@ void UART_INIT(uint32_t baud)
 	flagReportData = FRD_SEND;
 }
 
-unsigned char UART_receive(unsigned char block)
-{
-	if(!block)
-	{
-		if(!(UCSR1A & (1<<RXC1)))
-			return 0;
-		else
-			return UDR1;
-	}
-	else
-	{
-		while(!(UCSR1A & (1<<RXC1)));
-		return UDR1;
-	}
-	return 0;
-}
-
 void UART_transmit(unsigned char data)
 {
 	while(!(UCSR1A & (1<<UDRE1)));

@@ -1,8 +1,6 @@
 {
    "bindings" : {
       "/actions/legacy" : {
-         "haptics" : [
-         ],
          "poses" : [
             {
                "output" : "/actions/legacy/in/Left_Pose",

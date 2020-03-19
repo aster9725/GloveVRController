@@ -30,7 +30,7 @@ extern volatile float beta;				// algorithm gain
 //---------------------------------------------------------------------------------------------------
 // Definitions
 
-#define sampleFreq	500.0f		// sample frequency in Hz
+//#define sampleFreq	500.0f		// sample frequency in Hz
 
 //---------------------------------------------------------------------------------------------------
 // Function declarations

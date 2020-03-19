@@ -2,6 +2,10 @@
 GloveDriverDLL/GloveDriverDLL.tlog
 GloveDriverDLL/GloveDriverDLL.log
 GloveDriverDLL/*.obj
-GloveDriverDLL/*.pdb
+*.pdb
 GloveDriverDLL/x64/
 x64/
+Debug/
+Release/
+Win32Debug/
+

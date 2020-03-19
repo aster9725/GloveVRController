@@ -23,7 +23,6 @@ extern volatile uint8_t rxUART[RXUART_BUFF_SIZE];
 
 
 void UART_INIT(uint32_t baud);
-unsigned char UART_receive(unsigned char block);
 void UART_transmit(unsigned char data);
 void UART_printString(char *str);
 void UART_printUINT(uint32_t n);

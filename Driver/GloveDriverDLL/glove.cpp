@@ -141,11 +141,11 @@ public:
 		m_pose.qRotation.y = d_pose->qPos.y;
 		m_pose.qRotation.z = d_pose->qPos.z;
 
-		/*
-		m_pose.vecPosition[0] = d_pose->acc.x / sampleFreq;
+		
+		/*m_pose.vecPosition[0] = d_pose->acc.x / sampleFreq;
 		m_pose.vecPosition[1] = d_pose->acc.y / sampleFreq;
-		m_pose.vecPosition[2] = d_pose->acc.z / sampleFreq;
-		*/
+		m_pose.vecPosition[2] = d_pose->acc.z / sampleFreq;*/
+		
 		VRServerDriverHost()->TrackedDevicePoseUpdated(m_id, m_pose, sizeof(DriverPose_t));
 	}
 
@@ -241,11 +241,11 @@ public:
 							m_frame_count++;
 							UpdateControllerPose();
 							UpdateHandSkeletonPoses();
-							//if (m_frame_count % 500 == 0)
-							//	DriverLog("Dev] TimeStamp");
+							if (m_frame_count % 100 == 0)
+								DriverLog("Dev] TimeStamp");
 						}
-						//else
-							//DriverLog("Dev] Driver fail to get single USB data object");
+						/*else
+							DriverLog("Dev] Driver fail to get single USB data object");*/
 					}
 					else
 					{

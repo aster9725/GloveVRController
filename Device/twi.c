@@ -24,7 +24,7 @@ void TWI_INIT(void)
 	DDRC = 0x00;
 	PORTC = 0x30;
 	TWBR = (uint8_t)TWBR_val;
-	//TWSR = 0x00;
+	TWSR = 0x00;
 
 
 	//TWCR = _BV(TWEN);	// Enable I2C Interrupt	

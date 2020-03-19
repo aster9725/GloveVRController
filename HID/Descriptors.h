@@ -38,7 +38,6 @@
 
 	/* Includes: */
 		#include <LUFA/Drivers/USB/USB.h>
-
 		#include <avr/pgmspace.h>
 
 		#include "Config/AppConfig.h"
