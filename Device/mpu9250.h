@@ -216,5 +216,5 @@ uint8_t readACC(uint8_t* data);
 uint8_t readGyro(uint8_t* data);
 uint8_t readMag(uint8_t* data);
 uint8_t readAll(uint8_t* data);
-
+int32_t g_base[3];
 #endif /* MPU9250_H_ */

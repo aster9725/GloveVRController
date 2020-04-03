@@ -50,12 +50,12 @@ uint16_t MPU9250_init(float* a_bias, float* g_bias)
 	// be higher than 1 / 0.0059 = 170 Hz
 	// DLPF_CFG = bits 2:0 = 011; this limits the sample rate to 1000 Hz for both
 	// With the MPU9250, it is possible to get gyro sample rates of 32 kHz (!), 8 kHz, or 1 kHz
-	data = 0x00;	//set gyro 250Hz, low pass filter
+	data = 0x03;	//set gyro 250Hz, low pass filter
 	ret = TWI_WriteReg(MPU9250_ADDRESS, CONFIG, &data, 1);
 	if(ret)
 		return ADDIDX(ret, 8);
 	// Set sample rate = gyroscope output rate/(1 + SMPLRT_DIV)
-	data = 0x04;
+	data = 0x01;
 	ret = TWI_WriteReg(MPU9250_ADDRESS, SMPLRT_DIV, &data, 1);	// Use a 1000 Hz rate; a rate consistent with the filter update rate
 	if(ret)														// determined inset in CONFIG above
 		return ADDIDX(ret, 8);
@@ -84,7 +84,7 @@ uint16_t MPU9250_init(float* a_bias, float* g_bias)
 	ret = TWI_ReadReg(MPU9250_ADDRESS, ACCEL_CONFIG2, &data, 1);	// get current ACCEL_CONFIG2 register value
 	if(ret) return ADDIDX(ret, 8);
 	data &= ~0x0F;	// Clear accel_fchoice_b (bit 3) and A_DLPFG (bits [2:0])
-	data |= 0x00;	// Set accelerometer rate to 218.1Hz 
+	data |= 0x03;	// Set accelerometer rate to 218.1Hz 
 	ret = TWI_WriteReg(MPU9250_ADDRESS, ACCEL_CONFIG2, &data, 1);	// Write new ACCEL_CONFIG2 register value
 	if(ret) return ADDIDX(ret, 8);
 	
@@ -311,10 +311,14 @@ uint8_t MPU9250_Calibrate(float* a_bias, float* g_bias)
 	gyro_bias[1] /= (int32_t)packet_count;
 	gyro_bias[2] /= (int32_t)packet_count;
 	
-	//if(acc_bias[2] > 0L)	// Remove gravity from z axis
-		//acc_bias[2] += (int32_t) a_sens;
-	//else
-		//acc_bias[2] -= (int32_t) a_sens;
+	g_base[0] = gyro_bias[0];
+	g_base[1] = gyro_bias[1];
+	g_base[2] = gyro_bias[2];
+	
+	if(acc_bias[2] > 0L)	// Remove gravity from z axis
+		acc_bias[2] += (int32_t) a_sens;
+	else
+		acc_bias[2] -= (int32_t) a_sens;
 
 	// Construct the gyro biases for push to the hardware gyro bias registers, which are reset to zero upon device startup
 	data[0] = (-gyro_bias[0]/4  >> 8) & 0xFF; // Divide by 4 to get 32.9 LSB per degree/s to conform to expected bias input format
