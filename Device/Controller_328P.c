@@ -206,8 +206,8 @@ int main()
 	else
 		goto CONNECT_FAIL;
 
-	//AK8963_Calibrate(&(magBias[0]), &(magScale[0]));
-	//_delay_ms(1000);
+//	AK8963_Calibrate(&(magBias[0]), &(magScale[0]));
+//	_delay_ms(1000);
 
 	//runTimeStamp = millis();
 	while(1)
@@ -287,13 +287,10 @@ int main()
 		
 		if(!(ret & (ERR_MAG | ERR_DATA_NOT_READY(_MAG))))
 		{
-			uint8_t ASA[3];
 			
-			TWI_ReadReg(AK8963_ADDRESS, AK8963_ASAX, &(ASA[0]), 3);
-			
-			sdt.mag[0] = (float)raw_m[0]*((ASA[0]+128.000)/256.000)-1230;
-			sdt.mag[1] = (float)raw_m[1]*((ASA[1]+128.000)/256.000)+169;
-			sdt.mag[2] = (float)raw_m[2]*((ASA[2]+128.000)/256.000)-699;
+			sdt.mag[0] = ((float)raw_m[0])*(m_calibration[0])*(M_RES) - magBias[0];
+			sdt.mag[1] = ((float)raw_m[1])*(m_calibration[1])*(M_RES) - magBias[1];
+			sdt.mag[2] = ((float)raw_m[2])*(m_calibration[2])*(M_RES) - magBias[2];
 			
 			sdt.mag[0] *= magScale[0];
 			sdt.mag[1] *= magScale[1];
@@ -321,6 +318,7 @@ int main()
 		
 		UART_printString("#ENC:");
 		sprintf(buffer,"%d,%d,%d,%d,",sdt.encData[1], sdt.encData[2], sdt.encData[3], sdt.encData[4]);
+		//sprintf(buffer,"%f,%f,%f,%d,",sdt.mag[0], sdt.mag[1], sdt.mag[2], sdt.encData[4]);
 		UART_printString(buffer);
 		memset(buffer, 0, sizeof(buffer));
 		_delay_ms(10);

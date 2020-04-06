@@ -117,13 +117,13 @@ uint16_t AK8963_init(uint8_t Mmode, float* g_bias, float* g_scale)
 	data = M_PD;
 	ret = TWI_WriteReg(AK8963_ADDRESS, AK8963_CNTL, &data, 1);
 	if(ret)		return ADDIDX(ret, 8);
-	_delay_ms(100);
+	_delay_ms(10);
 	
 	// enter fuse
 	data = M_FUSE;
 	ret = TWI_WriteReg(AK8963_ADDRESS, AK8963_CNTL, &data, 1);
 	if(ret)		return ADDIDX(ret, 8);
-	_delay_ms(100);
+	_delay_ms(10);
 	
 	//read ASAX/Y/Z
 	ret = TWI_ReadReg(AK8963_ADDRESS, AK8963_ASAX, &(rawData[0]), 3);
@@ -137,14 +137,14 @@ uint16_t AK8963_init(uint8_t Mmode, float* g_bias, float* g_scale)
 	ret = TWI_WriteReg(AK8963_ADDRESS, AK8963_CNTL, &data, 1);
 	if(ret)
 	return ADDIDX(ret, 8);
-	_delay_ms(100);
+	_delay_ms(10);
 	
 		
 	data = MFS_16BITS << 4 | Mmode;
 	ret = TWI_WriteReg(AK8963_ADDRESS, AK8963_CNTL, &data, 1);
 	if(ret)
 		return ADDIDX(ret, 8);
-	_delay_ms(100);
+	_delay_ms(10);
 		
 	return 0;
 }
@@ -275,7 +275,7 @@ uint8_t MPU9250_Calibrate(float* a_bias, float* g_bias)
 	ret = TWI_WriteReg(MPU9250_ADDRESS, FIFO_EN, &regVal, 1);
 	if(ret)	return ADDIDX(ret, 8);
 	
-	_delay_ms(100);	// wait for fifo is filled by acc/gyro data
+	_delay_ms(40);	// wait for fifo is filled by acc/gyro data
 	
 	regVal = 0x00; // disable fifo
 	ret = TWI_WriteReg(MPU9250_ADDRESS, FIFO_EN, &regVal, 1);
